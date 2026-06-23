@@ -40,7 +40,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  app:
+  filter:
     build:
       context: .
       dockerfile: Dockerfile.dev

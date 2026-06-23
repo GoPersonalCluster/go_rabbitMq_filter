@@ -5,7 +5,6 @@ WORKDIR /app
 # Ferramentas úteis para desenvolvimento
 RUN go install github.com/air-verse/air@latest
 
-COPY app/go.mod app/go.sum ./
 
 RUN go mod download
 
