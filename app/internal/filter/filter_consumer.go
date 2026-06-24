@@ -1,10 +1,11 @@
 package filter
 
-import (  "github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer" )
-
-type d struct {
+import (
+	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
+)
+type FilterConsumer struct {
 
 }
-
-
-var sds = consumer.RabbitMQHandlerConfig{}
+func test(){
+	e := *consumer.Consumer{}
+}
