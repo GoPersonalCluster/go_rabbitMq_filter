@@ -1,8 +1,10 @@
 package filter
 
 import (
-	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer",
 	"errors"
+
+	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/config"
 )
 
 type FilterCommand struct {
@@ -11,10 +13,20 @@ type FilterCommand struct {
 func (c *FilterCommand) GetQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
 
 	switch event.EventName {
-		case "PII": return "PII_Queue", nil
-		default : return "err" , errors.New(event.EventName + "event not found")
+	case "PII":
+		return c.GetPIIQueue(event)
+	default:
+		return c.GetDefaultErrorResponse(event)
 	}
 
 }
+func (c *FilterCommand) GetDefaultErrorResponse(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
+	event.AddMetaHeader(config.GetHostName(), "ErrorMatchingEvent", nil)
+	return *event, errors.New(event.EventName + "event not found")
+}
+
+func (c *FilterCommand) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
+	event.AddMetaHeader(config.GetHostName(), "ErrorMatchingEvent", []{Key:})
 
 
+}

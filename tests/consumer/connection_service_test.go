@@ -3,7 +3,6 @@ package filter_test
 import (
 	"bytes"
 	"testing"
-
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
 )

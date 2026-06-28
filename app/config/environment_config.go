@@ -26,6 +26,11 @@ type EnvironmentConfig struct {
 	PostgresDB       string
 	PostgresUser     string
 	PostgresPassword string
+	HostName         string
+}
+
+func GetHostName() string {
+	return "GO_RabbitMqFilter"+NewEnvironmentConfig().HostName
 }
 
 func NewEnvironmentConfig() *EnvironmentConfig {
@@ -40,5 +45,6 @@ func NewEnvironmentConfig() *EnvironmentConfig {
 		PostgresDB:       getEnv("postgres_db"),
 		PostgresUser:     getEnv("postgres_user"),
 		PostgresPassword: getEnv("postgres_password"),
+		HostName:         getEnv("host_name"),
 	}
 }
