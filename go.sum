@@ -1,4 +1,6 @@
 github.com/GoPersonalCluster/GO_RabbitMqHandler v0.0.0-20260623222008-caea4524bf4f h1:K/joXmB5g3EGoEYi1DsqzVskCYdR6AZgCDHoTs46KRg=
 github.com/GoPersonalCluster/GO_RabbitMqHandler v0.0.0-20260623222008-caea4524bf4f/go.mod h1:MC14IvTEgp0Qow4H9246LvWWdA14HKxAlYyFM7uRoK4=
+github.com/GoPersonalCluster/GO_RabbitMqHandler v1.0.1 h1:kuILw8edMyll7IKYoNW2FO5rHmMiWunGB+yoJqXWmec=
+github.com/GoPersonalCluster/GO_RabbitMqHandler v1.0.1/go.mod h1:nySvN4d2rUsGBLUq9EkU5nIbZZ1rMumTZmrIRmu1bX4=
 github.com/streadway/amqp v1.1.0 h1:py12iX8XSyI7aN/3dUT8DFIDJazNJsVJdxNVEpnQTZM=
 github.com/streadway/amqp v1.1.0/go.mod h1:WYSrTEYHOXHd0nwFeUXAe2G2hRnQT+deZJJf88uS9Bg=

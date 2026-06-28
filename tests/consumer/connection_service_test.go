@@ -1,4 +1,4 @@
-package service_test
+package filter_test
 
 import (
 	"bytes"
@@ -72,24 +72,6 @@ func (s *TestConcreteStrategy) Start() ([]byte, error) {
 	print("Message received")
 	return []byte("success"), nil
 }
-
-// func TestConcreteFactory_CreateStrategy(t *testing.T) {
-// 	factory := TestConcreteFactory{}
-
-// 	event := &consumer.IntegrationEvent{
-// 		EventName: "TestEvent",
-// 	}
-
-// 	strategy, err := factory.CreateStrategy(event)
-
-// 	if err != nil {
-// 		t.Fatalf("erro inesperado: %v", err)
-// 	}
-
-// 	if strategy == nil {
-// 		t.Fatal("strategy não deveria ser nil")
-// 	}
-// }
 
 func TestConcreteStrategy_Start(t *testing.T) {
 	strategy := TestConcreteStrategy{}
