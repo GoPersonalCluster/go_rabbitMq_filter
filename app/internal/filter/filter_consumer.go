@@ -21,13 +21,14 @@ func (c *FilterCommand) GetQueue(event *consumer.IntegrationEvent) (consumer.Int
 
 }
 func (c *FilterCommand) GetDefaultErrorResponse(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
-	event.AddMetaHeader(config.GetHostName(), "ErrorMatchingEvent", nil)
-		
+	event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
 	return *event, errors.New(event.EventName + "event not found")
 }
 
-func (c *FilterCommand) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
-	event.AddMetaHeader(config.GetHostName(), "ErrorMatchingEvent" , []{ Key: })
 
-	
+func (c *FilterCommand) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
+	mh := event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
+	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
+	event.MetaHeader = append(event.MetaHeader, mh)
+	return *event, nil
 }
