@@ -2,33 +2,33 @@ package filter
 
 import (
 	"errors"
-
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter/strategy"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/config"
 )
 
-type FilterCommand struct {
+type FilterFactory struct {
+	event *consumer.IntegrationEvent
 }
 
-func (c *FilterCommand) GetQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
+func (c *FilterFactory) CreateStrategy(event *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
 
 	switch event.EventName {
 	case "PII":
-		return c.GetPIIQueue(event)
+		return &strategy.PiiQueueStrategy{event: event}, nil
 	default:
-		return c.GetDefaultErrorResponse(event)
+		return nil, c.GetDefaultErrorResponse(event)
 	}
-
 }
-func (c *FilterCommand) GetDefaultErrorResponse(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
+
+func (c *FilterFactory) GetDefaultErrorResponse(event *consumer.IntegrationEvent) error {
 	event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
-	return *event, errors.New(event.EventName + "event not found")
+	return errors.New(event.EventName + "event not found")
 }
 
-
-func (c *FilterCommand) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.IntegrationEvent, error) {
-	mh := event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
-	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
-	event.MetaHeader = append(event.MetaHeader, mh)
-	return *event, nil
-}
+// func (c *FilterFactory) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
+// 	mh := event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
+// 	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
+// 	event.MetaHeader = append(event.MetaHeader, mh)
+// 	return *event, nil
+// }
