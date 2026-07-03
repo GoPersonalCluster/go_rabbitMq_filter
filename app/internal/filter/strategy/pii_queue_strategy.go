@@ -9,15 +9,16 @@ type PiiQueueStrategy struct {
 	event *consumer.IntegrationEvent
 }
 
-func (pQS *PiiQueueStrategy) New(iE *consumer.IntegrationEvent) (PiiQueueStrategy, error) {
+func (pQS *PiiQueueStrategy) New(iE *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
 	iE.EventName = "PII"
-	return PiiQueueStrategy{event: iE}, nil
+	mh := iE.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
+	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
+	iE.MetaHeader = append(iE.MetaHeader, mh)
+
+	return &PiiQueueStrategy{event: iE}, nil
 }
 
 func (pQS *PiiQueueStrategy) Start() ([]byte, error) {
-	mh := pQS.event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
-	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
-	pQS.event.MetaHeader = append(pQS.event.MetaHeader, mh)
-	return *pQS.event , nil
 
+	return []byte("PII_Queue"), nil
 }

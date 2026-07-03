@@ -15,7 +15,7 @@ func (c *FilterFactory) CreateStrategy(event *consumer.IntegrationEvent) (consum
 
 	switch event.EventName {
 	case "PII":
-		return &strategy.PiiQueueStrategy{event: event}, nil
+		return c.GetPIIQueue(event)
 	default:
 		return nil, c.GetDefaultErrorResponse(event)
 	}
@@ -26,9 +26,9 @@ func (c *FilterFactory) GetDefaultErrorResponse(event *consumer.IntegrationEvent
 	return errors.New(event.EventName + "event not found")
 }
 
-// func (c *FilterFactory) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
-// 	mh := event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
-// 	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
-// 	event.MetaHeader = append(event.MetaHeader, mh)
-// 	return *event, nil
-// }
+
+func (c *FilterFactory) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
+	strategy := strategy.PiiQueueStrategy{}
+
+	return strategy.New(event)
+}
