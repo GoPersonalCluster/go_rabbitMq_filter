@@ -37,3 +37,33 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GO_PERSONAL_CLUSTER_ACTOR }}
           password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
+
+      - name: Build Image
+        run: |
+          docker build \
+            -t ghcr.io/${{ github.repository }}/golang-app:${{ github.sha }} \
+            -t ghcr.io/${{ github.repository }}/golang-app:latest .
+
+      - name: Push Image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/golang-app:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/golang-app:latest
+
+      - name: Configurar kubectl
+        run: |
+          mkdir -p ~/.kube
+
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+
+      - name: Atualizar Deployment
+        run: |
+
+          kubectl apply -f k8s/namespace.yaml
+
+          kubectl apply -f k8s/deployment.yaml
+
+          kubectl apply -f k8s/service.yaml
+
+          kubectl rollout restart deployment/golang-app -n ci
+
+          kubectl rollout status deployment/golang-app -n ci
