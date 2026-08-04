@@ -30,6 +30,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 1.25
+      - name: Nome da imagem
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
     
       - name: Login GHCR
         uses: docker/login-action@v3
@@ -41,13 +45,13 @@ jobs:
       - name: Build Image
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository }}/golang-app:${{ github.sha }} \
-            -t ghcr.io/${{ github.repository }}/golang-app:latest .
+            -t ghcr.io/$IMAGE_NAME/golang-app:${{ github.sha }} \
+            -t ghcr.io/$IMAGE_NAME/golang-app:latest .
 
       - name: Push Image
         run: |
-          docker push ghcr.io/${{ github.repository }}/golang-app:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository }}/golang-app:latest
+          docker push ghcr.io/$IMAGE_NAME/golang-app:${{ github.sha }}
+          docker push ghcr.io/$IMAGE_NAME/golang-app:latest
 
       - name: Configurar kubectl
         run: |
