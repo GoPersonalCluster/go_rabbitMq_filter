@@ -9,7 +9,8 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o app .
+RUN CGO_ENABLED=0 GOOS=linux \
+    go build -o app ./app/internal
 
 FROM debian:12-slim
 
