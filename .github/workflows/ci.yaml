@@ -68,6 +68,13 @@ jobs:
           kubectl config current-context
           kubectl cluster-info
           kubectl get namespaces
+          
+      - name: Mostrar namespace.yaml
+        run: |
+          echo "========== namespace.yaml =========="
+          cat k8s/namespace.yaml
+          echo "===================================="
+
       - name: Atualizar Deployment
         run: |
 
