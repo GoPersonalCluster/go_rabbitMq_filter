@@ -57,7 +57,11 @@ jobs:
         run: |
           mkdir -p ~/.kube
 
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          cat <<EOF > ~/.kube/config
+          ${{ secrets.KUBE_CONFIG }}
+          EOF
+
+              chmod 600 ~/.kube/config
 
       - name: Atualizar Deployment
         run: |
