@@ -62,7 +62,12 @@ jobs:
           EOF
 
               chmod 600 ~/.kube/config
-
+      - name: Diagnóstico Kubernetes
+        run: |
+          kubectl version --client
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get namespaces
       - name: Atualizar Deployment
         run: |
 
