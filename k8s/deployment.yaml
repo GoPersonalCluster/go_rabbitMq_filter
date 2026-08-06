@@ -13,50 +13,54 @@ spec:
       app: golang-app
 
   template:
-
     metadata:
       labels:
         app: golang-app
 
     spec:
-
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
 
       containers:
+        - name: golang-app
 
-      - name: golang-app
+          image: ghcr.io/waltereidi/go_rabbitmq_filter:latest
+          imagePullPolicy: Always
 
-        image: ghcr.io/waltereidi/GoPersonalCluster/golang-app:latest
+          ports:
+            - containerPort: 8080
 
-        imagePullPolicy: Always
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
 
-        ports:
-        - containerPort: 8080
+            - name: RABBITMQ_PORT
+              value: "5672"
 
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
+            - name: RABBITMQ_USER
+              value: guest
 
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
+            - name: RABBITMQ_PASSWORD
+              value: guest
 
-        livenessProbe:
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
 
-          httpGet:
-            path: /health
-            port: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
 
-          initialDelaySeconds: 15
-          periodSeconds: 10
-
-        readinessProbe:
-
-          httpGet:
-            path: /health
-            port: 8080
-
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
