@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: go_rabbitmq_filter
+  name: go-rabbitmq-filter
   namespace: ci
 
 spec:
 
   selector:
-    app: go_rabbitmq_filter
+    app: go-rabbitmq-filter
 
   ports:
 
