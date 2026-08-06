@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy PostgreSQL and RabbitMQ
+    name: Deploy Golang app
     runs-on: ubuntu-latest
 
     steps:
