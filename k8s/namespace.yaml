@@ -1,5 +1,4 @@
-- name: Atualizar Deployment
-  run: |
-    kubectl apply -f k8s/namespace.yaml
-    kubectl apply -f k8s/deployment.yaml
-    kubectl apply -f k8s/service.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ci
