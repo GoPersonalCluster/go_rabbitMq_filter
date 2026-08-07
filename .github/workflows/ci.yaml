@@ -54,7 +54,7 @@ jobs:
           docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest
  
       - name: Configurar kubectl
-        run: |
+        run: | 
           mkdir -p ~/.kube
 
           cat <<EOF > ~/.kube/config
