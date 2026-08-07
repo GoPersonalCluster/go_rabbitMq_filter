@@ -52,7 +52,7 @@ jobs:
         run: |
           docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }}
           docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest
-
+ 
       - name: Configurar kubectl
         run: |
           mkdir -p ~/.kube
