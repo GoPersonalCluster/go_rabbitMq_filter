@@ -52,18 +52,16 @@ jobs:
         run: |
           docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }}
           docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest
- 
-      - name: Configurar kubectl
+      - name: Configurar kubeconfig
         run: |
           mkdir -p ~/.kube
 
-          printf '%s' '${{ secrets.KUBE_CONFIG_BASE64 }}' | base64 --decode > ~/.kube/config
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ~/.kube/config
 
           chmod 600 ~/.kube/config
 
           echo "Validando kubeconfig..."
           head -n 1 ~/.kube/config
-
           kubectl config current-context
           kubectl cluster-info
           kubectl get namespaces
