@@ -59,7 +59,7 @@ jobs:
 
           cat <<EOF > ~/.kube/config
           ${{ secrets.KUBE_CONFIG }}
-          EOF
+          EOF 
 
               chmod 600 ~/.kube/config
       - name: Diagnóstico Kubernetes
