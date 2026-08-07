@@ -45,13 +45,13 @@ jobs:
       - name: Build Image
         run: |
           docker build \
-            -t ghcr.io/$IMAGE_NAME/go_rabbitmq_filter:${{ github.sha }} \
-            -t ghcr.io/$IMAGE_NAME/go_rabbitmq_filter:latest .
+            -t ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }} \
+            -t ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest .
 
       - name: Push Image
         run: |
-          docker push ghcr.io/$IMAGE_NAME/go_rabbitmq_filter:${{ github.sha }}
-          docker push ghcr.io/$IMAGE_NAME/go_rabbitmq_filter:latest
+          docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }}
+          docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest
 
       - name: Configurar kubectl
         run: |
@@ -84,6 +84,6 @@ jobs:
 
           kubectl apply -f k8s/service.yaml
 
-          kubectl rollout restart deployment/go_rabbitmq_filter -n ci
+          kubectl rollout restart deployment/go-rabbitmq-filter -n ci
 
-          kubectl rollout status deployment/go_rabbitmq_filter -n ci
+          kubectl rollout status deployment/go-rabbitmq-filter -n ci

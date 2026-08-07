@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: go_rabbitmq_filter
+  name: go-rabbitmq-filter
   namespace: ci
 
 spec:
@@ -10,21 +10,21 @@ spec:
 
   selector:
     matchLabels:
-      app: go_rabbitmq_filter
+      app: go-rabbitmq-filter
 
   template:
     metadata:
       labels:
-        app: go_rabbitmq_filter
+        app: go-rabbitmq-filter
 
     spec:
       imagePullSecrets:
         - name: ghcr-secret
 
       containers:
-        - name: go_rabbitmq_filter
+        - name: go-rabbitmq-filter
 
-          image: ghcr.io/waltereidi/go_rabbitmq_filter:latest
+          image: ghcr.io/waltereidi/go-rabbitmq-filter:latest
           imagePullPolicy: Always
 
           ports:
