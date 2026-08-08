@@ -57,13 +57,13 @@ jobs:
       - name: Build Image
         run: |
           docker build \
-            -t ghcr.io/$IMAGE_NAME:${IMAGE_TAG} \
+            -t  ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:6732733551943b4800af13491ad7aba9551a889f \
             -t ghcr.io/$IMAGE_NAME:latest \
             .
 
       - name: Push Image
         run: |
-          docker push ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
+          docker push  ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:6732733551943b4800af13491ad7aba9551a889f
           docker push ghcr.io/$IMAGE_NAME:latest
 
       - name: Configurar kubeconfig
@@ -95,7 +95,7 @@ jobs:
       - name: Atualizar imagem do Deployment
         run: |
           kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter=ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
+            go-rabbitmq-filter= ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:6732733551943b4800af13491ad7aba9551a889f
 
       - name: Verificar imagem configurada
         run: |
