@@ -1,26 +1,29 @@
 name: RabbitMQ Handler CI
 
 on:
-  workflow_run:
-    workflows: [Build] 
-    types:
-      - completed 
-
   push:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   deploy:
     name: Deploy Golang app
     runs-on: ubuntu-latest
+
+    # Não faz deploy se o workflow Build terminou com erro
+    if: >
+      github.event_name == 'push' ||
+      github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout
@@ -28,13 +31,22 @@ jobs:
 
       - name: Setup Go
         uses: actions/setup-go@v5
-        with: 
-          go-version: 1.25 
-      - name: Nome da imagem 
+        with:
+          go-version: '1.25'
+
+      # Nome EXATO do package no GHCR:
+      # ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter
+      - name: Definir imagem
         run: |
-          IMAGE_NAME=$(echo "gopersonalcluster/go-rabbitmq-filter" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-     
+          IMAGE_NAME="gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter"
+          IMAGE_TAG="${{ github.sha }}"
+
+          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+
+          echo "Imagem:"
+          echo "ghcr.io/$IMAGE_NAME:$IMAGE_TAG"
+
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
@@ -45,42 +57,59 @@ jobs:
       - name: Build Image
         run: |
           docker build \
-            -t ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }} \
-            -t ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest .
+            -t ghcr.io/$IMAGE_NAME:${IMAGE_TAG} \
+            -t ghcr.io/$IMAGE_NAME:latest \
+            .
 
       - name: Push Image
         run: |
-          docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:${{ github.sha }}
-          docker push ghcr.io/$IMAGE_NAME/go-rabbitmq-filter:latest
+          docker push ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
+          docker push ghcr.io/$IMAGE_NAME:latest
+
       - name: Configurar kubeconfig
         run: |
           mkdir -p ~/.kube
 
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          printf '%s' '${{ secrets.KUBE_CONFIG }}' | base64 --decode > ~/.kube/config
 
           chmod 600 ~/.kube/config
 
           echo "Validando kubeconfig..."
-          head -n 1 ~/.kube/config
+
           kubectl config current-context
           kubectl cluster-info
           kubectl get namespaces
-          
+
       - name: Mostrar namespace.yaml
         run: |
           echo "========== namespace.yaml =========="
           cat k8s/namespace.yaml
           echo "===================================="
 
-      - name: Atualizar Deployment
-        run: | 
-
+      - name: Aplicar Kubernetes
+        run: |
           kubectl apply -f k8s/namespace.yaml
-
           kubectl apply -f k8s/deployment.yaml
-
           kubectl apply -f k8s/service.yaml
 
-          kubectl rollout restart deployment/go-rabbitmq-filter -n ci
+      - name: Atualizar imagem do Deployment
+        run: |
+          kubectl -n ci set image deployment/go-rabbitmq-filter \
+            go-rabbitmq-filter=ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
 
-          kubectl rollout status deployment/go-rabbitmq-filter -n ci
+      - name: Verificar imagem configurada
+        run: |
+          kubectl -n ci get deployment go-rabbitmq-filter \
+            -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+          echo
+
+      - name: Aguardar Deployment
+        run: |
+          kubectl rollout status deployment/go-rabbitmq-filter \
+            -n ci \
+            --timeout=10m
+
+      - name: Verificar Pods
+        run: |
+          kubectl get pods -n ci -o wide
