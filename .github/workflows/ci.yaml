@@ -73,7 +73,7 @@ jobs:
           echo "===================================="
 
       - name: Atualizar Deployment
-        run: |
+        run: | 
 
           kubectl apply -f k8s/namespace.yaml
 
