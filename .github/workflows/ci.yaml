@@ -91,25 +91,31 @@ jobs:
           kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
+- name: Atualizar imagem do Deployment
+  run: |
+    IMAGE="ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:${IMAGE_TAG}"
 
-      - name: Atualizar imagem do Deployment
-        run: |
-          kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter=ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
+    echo "Atualizando Deployment para:"
+    echo "$IMAGE"
 
-      - name: Verificar imagem configurada
-        run: |
-          kubectl -n ci get deployment go-rabbitmq-filter \
-            -o jsonpath='{.spec.template.spec.containers[0].image}'
+    kubectl -n ci set image deployment/go-rabbitmq-filter \
+      go-rabbitmq-filter="$IMAGE"
 
-          echo
+- name: Verificar imagem configurada
+  run: |
+    echo "Imagem configurada no Deployment:"
 
-      - name: Aguardar Deployment
-        run: |
-          kubectl rollout status deployment/go-rabbitmq-filter \
-            -n ci \
-            --timeout=10m
+    kubectl -n ci get deployment go-rabbitmq-filter \
+      -o jsonpath='{.spec.template.spec.containers[0].image}'
 
-      - name: Verificar Pods
-        run: |
-          kubectl get pods -n ci -o wide
+    echo
+
+- name: Aguardar Deployment
+  run: |
+    kubectl rollout status deployment/go-rabbitmq-filter \
+      -n ci \
+      --timeout=10m
+
+- name: Verificar Pods
+  run: |
+    kubectl get pods -n ci -o wide
