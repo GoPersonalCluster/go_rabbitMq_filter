@@ -91,20 +91,14 @@ jobs:
           kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
+
       - name: Atualizar imagem do Deployment
         run: |
-          IMAGE="ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:${IMAGE_TAG}"
-
-          echo "Atualizando Deployment para:"
-          echo "$IMAGE"
-
           kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter="$IMAGE"
+            go-rabbitmq-filter=ghcr.io/$IMAGE_NAME:${IMAGE_TAG}
 
       - name: Verificar imagem configurada
         run: |
-          echo "Imagem configurada no Deployment:"
-
           kubectl -n ci get deployment go-rabbitmq-filter \
             -o jsonpath='{.spec.template.spec.containers[0].image}'
 
