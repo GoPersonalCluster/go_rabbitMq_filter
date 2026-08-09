@@ -1,11 +1,15 @@
 name: RabbitMQ Handler CI
 
 on:
-  workflow_run:
-    workflows:
-      - Build
-    types:
-      - completed
+ push:
+    branches:
+      - main
+
+    workflow_run:
+      workflows:
+        - Build
+      types:
+        - completed
 
 permissions:
   contents: read
