@@ -1,4 +1,4 @@
-```yaml
+
 name: RabbitMQ Handler CI
 
 on:
@@ -197,4 +197,4 @@ jobs:
             -o custom-columns="POD:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase"
 
           echo "=========================================="
-```
+
