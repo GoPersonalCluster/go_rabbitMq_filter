@@ -95,7 +95,7 @@ jobs:
       - name: Atualizar imagem
         run: |
           kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter=ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter:07d50d9ba6a2fc54614a88191d023eccbd8562df
+            go-rabbitmq-filter=ghcr.io/gopersonalcluster/go_rabbitmq_filter/go-rabbitmq-filter:ce79af52907338d1e04a2f88dcc6801f59d8891c
 
       - name: Verificar imagem configurada
         run: |
