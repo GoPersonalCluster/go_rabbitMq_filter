@@ -51,7 +51,7 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GO_PERSONAL_CLUSTER_ACTOR }}
           password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
-          
+           
       - name: Build Docker image
         run: |
           docker build \
