@@ -42,7 +42,7 @@ jobs:
       # ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter
       - name: Definir imagem
         run: |
-          echo "IMAGE="ghcr.io/gopersonalcluster/go-rabbitmq-filter" >> "$GITHUB_ENV"
+          IMAGE="ghcr.io/gopersonalcluster/go-rabbitmq-filter"
           IMAGE_TAG="${{ github.sha }}"
 
       - name: Build Docker image
