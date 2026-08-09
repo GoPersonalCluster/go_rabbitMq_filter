@@ -37,7 +37,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GO_PERSONAL_CLUSTER_ACTOR }}
+          password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
       # Nome EXATO do package no GHCR:
       # ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter
       - name: Definir imagem
@@ -45,12 +50,7 @@ jobs:
           echo "IMAGE=gopersonalcluster/go-rabbitmq-filter" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=${{ github.sha }}" >> "$GITHUB_ENV"
       
-      - name: Login GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GO_PERSONAL_CLUSTER_ACTOR }}
-          password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
+
            
       - name: Build Docker image
         run: |
