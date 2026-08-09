@@ -1,19 +1,20 @@
 name: RabbitMQ Handler CI
 
 on:
- push:
+  push:
     branches:
       - main
 
-    workflow_run:
-      workflows:
-        - Build
-      types:
-        - completed
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
 
 permissions:
   contents: read
   packages: write
+
 
 env:
   REGISTRY: ghcr.io
