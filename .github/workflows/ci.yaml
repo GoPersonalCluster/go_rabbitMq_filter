@@ -42,14 +42,21 @@ jobs:
       # ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter
       - name: Definir imagem
         run: |
-          IMAGE_NAME="${REGISTRY}/${IMAGE_NAME}"
-          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          echo "IMAGE=ghcr.io/${{ github.repository }}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${{ github.sha }}" >> "$GITHUB_ENV"
 
-          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
-          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t "${IMAGE}:${IMAGE_TAG}" \
+            -t "${IMAGE}:latest" \
+            .
 
-          echo "Imagem:"
-          echo "ghcr.io/$IMAGE_NAME:$IMAGE_TAG"
+      - name: Push Docker image
+        run: |
+          docker push "${IMAGE}:${IMAGE_TAG}"
+          docker push "${IMAGE}:latest"
+
 
       - name: Login GHCR
         uses: docker/login-action@v3
