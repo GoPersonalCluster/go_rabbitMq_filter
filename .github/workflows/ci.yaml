@@ -1,10 +1,6 @@
 name: RabbitMQ Handler CI
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_run:
     workflows:
       - Build
@@ -15,7 +11,6 @@ permissions:
   contents: read
   packages: write
 
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: gopersonalcluster/go-rabbitmq-filter
@@ -25,22 +20,21 @@ jobs:
     name: Build and Deploy Golang app
     runs-on: ubuntu-latest
 
-    # Executa somente se o workflow Build terminou com sucesso
+    # Só executa quando o workflow "Build" terminar com sucesso
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
 
       # ============================================================
-      # Checkout
+      # 1. Checkout do MESMO commit que executou o Build
       # ============================================================
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Usa exatamente o commit que executou o workflow Build
           ref: ${{ github.event.workflow_run.head_sha }}
 
       # ============================================================
-      # Setup Go
+      # 2. Setup Go
       # ============================================================
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -48,7 +42,15 @@ jobs:
           go-version: '1.25'
 
       # ============================================================
-      # Definir versão da imagem
+      # 3. Definir nome e tag da imagem
+      #
+      # Imagem:
+      #
+      # ghcr.io/gopersonalcluster/go-rabbitmq-filter:<SHA>
+      #
+      # Também será criada:
+      #
+      # ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
       # ============================================================
       - name: Definir imagem Docker
         run: |
@@ -59,15 +61,14 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
 
           echo "=========================================="
-          echo "Imagem:"
+          echo "Docker Image"
+          echo "=========================================="
           echo "${IMAGE}:${IMAGE_TAG}"
-          echo
-          echo "Latest:"
           echo "${IMAGE}:latest"
           echo "=========================================="
 
       # ============================================================
-      # Login no GitHub Container Registry
+      # 4. Login no GitHub Container Registry
       # ============================================================
       - name: Login no GHCR
         uses: docker/login-action@v3
@@ -77,12 +78,12 @@ jobs:
           password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
 
       # ============================================================
-      # Build da imagem
+      # 5. Build da imagem
       #
-      # Serão criadas duas tags para a MESMA imagem:
+      # As duas tags apontam para a mesma imagem:
       #
-      #   ghcr.io/gopersonalcluster/go-rabbitmq-filter:<SHA>
-      #   ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
+      # :<SHA>
+      # :latest
       # ============================================================
       - name: Build Docker Image
         run: |
@@ -92,7 +93,7 @@ jobs:
             .
 
       # ============================================================
-      # Push para GHCR
+      # 6. Push para GHCR
       # ============================================================
       - name: Push Docker Image
         run: |
@@ -100,24 +101,27 @@ jobs:
           docker push "${IMAGE}:latest"
 
       # ============================================================
-      # Configurar kubeconfig
+      # 7. Configurar kubeconfig
       # ============================================================
       - name: Configurar kubeconfig
         run: |
           mkdir -p ~/.kube
 
-          printf '%s' '${{ secrets.KUBE_CONFIG }}' > ~/.kube/config
+          printf '%s' '${{ secrets.KUBE_CONFIG }}' \
+            > ~/.kube/config
 
           chmod 600 ~/.kube/config
 
-          echo "Validando kubeconfig..."
+          echo "=========================================="
+          echo "Validando Kubernetes"
+          echo "=========================================="
 
           kubectl config current-context
           kubectl cluster-info
           kubectl get namespaces
 
       # ============================================================
-      # Mostrar arquivos Kubernetes
+      # 8. Mostrar arquivos Kubernetes
       # ============================================================
       - name: Mostrar configuração Kubernetes
         run: |
@@ -136,7 +140,7 @@ jobs:
           echo "===================================="
 
       # ============================================================
-      # Aplicar recursos Kubernetes
+      # 9. Aplicar recursos Kubernetes
       # ============================================================
       - name: Aplicar Kubernetes
         run: |
@@ -145,25 +149,34 @@ jobs:
           kubectl apply -f k8s/service.yaml
 
       # ============================================================
-      # Atualizar Deployment
+      # 10. Atualizar imagem do Deployment
       #
       # IMPORTANTE:
-      # O Kubernetes recebe EXATAMENTE a mesma imagem que acabou
-      # de ser enviada para o GHCR.
+      #
+      # Esta é EXATAMENTE a mesma imagem que foi enviada
+      # para o GHCR neste workflow.
       # ============================================================
       - name: Atualizar imagem do Deployment
         run: |
-          echo "Atualizando Deployment..."
+          echo "=========================================="
+          echo "Atualizando Deployment"
+          echo "=========================================="
+
+          echo "Deployment: go-rabbitmq-filter"
+          echo "Container:  go-rabbitmq-filter"
+          echo "Imagem:     ${IMAGE}:${IMAGE_TAG}"
 
           kubectl -n ci set image deployment/go-rabbitmq-filter \
             go-rabbitmq-filter="${IMAGE}:${IMAGE_TAG}"
 
       # ============================================================
-      # Verificar imagem configurada
+      # 11. Verificar imagem configurada no Deployment
       # ============================================================
       - name: Verificar imagem configurada
         run: |
-          echo "Imagem configurada no Kubernetes:"
+          echo "=========================================="
+          echo "Imagem configurada no Deployment"
+          echo "=========================================="
 
           kubectl -n ci get deployment go-rabbitmq-filter \
             -o jsonpath='{.spec.template.spec.containers[0].image}'
@@ -171,7 +184,7 @@ jobs:
           echo
 
       # ============================================================
-      # Aguardar rollout
+      # 12. Aguardar rollout
       # ============================================================
       - name: Aguardar Deployment
         run: |
@@ -180,14 +193,20 @@ jobs:
             --timeout=10m
 
       # ============================================================
-      # Verificar Pods
+      # 13. Verificar Pods
       # ============================================================
       - name: Verificar Pods
         run: |
-          kubectl get pods -n ci -o wide
+          echo "=========================================="
+          echo "Pods"
+          echo "=========================================="
+
+          kubectl get pods \
+            -n ci \
+            -o wide
 
       # ============================================================
-      # Verificar imagem efetivamente utilizada pelos Pods
+      # 14. Verificar imagens efetivamente utilizadas
       # ============================================================
       - name: Verificar imagens dos Pods
         run: |
@@ -201,3 +220,45 @@ jobs:
             -o custom-columns="POD:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase"
 
           echo "=========================================="
+
+      # ============================================================
+      # 15. Diagnóstico automático em caso de falha
+      # ============================================================
+      - name: Diagnóstico em caso de falha
+        if: ${{ failure() }}
+        run: |
+          echo "=========================================="
+          echo "DIAGNÓSTICO DO DEPLOYMENT"
+          echo "=========================================="
+
+          echo
+          echo "----- Deployment -----"
+          kubectl describe deployment go-rabbitmq-filter -n ci || true
+
+          echo
+          echo "----- Pods -----"
+          kubectl get pods -n ci -o wide || true
+
+          echo
+          echo "----- Descrição dos Pods -----"
+
+          for POD in $(kubectl get pods \
+            -n ci \
+            -l app=go-rabbitmq-filter \
+            -o jsonpath='{.items[*].metadata.name}'); do
+
+            echo
+            echo "=========================================="
+            echo "POD: $POD"
+            echo "=========================================="
+
+            kubectl describe pod "$POD" -n ci || true
+          done
+
+          echo
+          echo "----- Events -----"
+
+          kubectl get events \
+            -n ci \
+            --sort-by='.lastTimestamp' \
+            | tail -50 || true
