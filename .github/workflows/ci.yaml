@@ -108,7 +108,7 @@ jobs:
           echo "Atualizando Deployment..."
 
           kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter="${IMAGE}:${IMAGE_TAG}"
+            go-rabbitmq-filter=ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
 
       - name: Verificar imagem configurada
         run: |
