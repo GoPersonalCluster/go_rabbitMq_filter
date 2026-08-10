@@ -13,4 +13,5 @@ func TestGetEnvironmentConfig(t *testing.T) {
 		t.Fatal("expected config, got nil")
 	}
 
+	
 }

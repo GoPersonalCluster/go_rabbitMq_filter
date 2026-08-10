@@ -30,18 +30,8 @@ spec:
           ports:
             - containerPort: 8080
 
-          env:
-            - name: RABBITMQ_HOST
-              value: rabbitmq
-
-            - name: RABBITMQ_PORT
-              value: "5672"
-
-            - name: RABBITMQ_USER
-              value: guest
-
-            - name: RABBITMQ_PASSWORD
-              value: guest
+          env_file:
+            - .env
 
           resources:
             requests:
