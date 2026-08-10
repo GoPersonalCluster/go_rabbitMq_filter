@@ -113,7 +113,7 @@ jobs:
       - name: Verificar imagem configurada
         run: |
           kubectl -n ci get deployment go-rabbitmq-filter \
-            -o jsonpath='{.spec.template.spec.containers[0].image}'
+            -o jsonpath='{.spec.template.spec.containers[0].image}' 
 
           echo
 
