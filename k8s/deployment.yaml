@@ -24,7 +24,7 @@ spec:
       containers:
         - name: go-rabbitmq-filter
 
-          image: ghcr.io/waltereidi/go-rabbitmq-filter:latest
+          image: ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
           imagePullPolicy: Always
 
           ports:
