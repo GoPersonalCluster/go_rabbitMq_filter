@@ -2,61 +2,55 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-name: go-rabbitmq-filter
-namespace: ci
+  name: go-rabbitmq-filter
+  namespace: ci
 
 spec:
-replicas: 2
+  replicas: 2
 
-selector:
-matchLabels:
-app: go-rabbitmq-filter
+  selector:
+    matchLabels:
+      app: go-rabbitmq-filter
 
-template:
-metadata:
-name: go-rabbitmq-filter
-namespace: ci
+  template:
+    metadata:
+      labels:
+        app: go-rabbitmq-filter
 
-spec:
-replicas: 2
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
 
-selector:
-matchLabels:
-app: go-rabbitmq-filter
-spec:
-  imagePullSecrets:
-    - name: ghcr-secret
+      containers:
+        - name: go-rabbitmq-filter
+          image: ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
+          imagePullPolicy: Always
 
-  containers:
-    - name: go-rabbitmq-filter
-      image: ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
-      imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
 
-      ports:
-        - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: go_rabbitmq_filter_env
 
-      envFrom:
-        - secretRef:
-            name: go_rabbitmq_filter_env
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
 
-      resources:
-        requests:
-          cpu: "100m"
-          memory: "128Mi"
-        limits:
-          cpu: "500m"
-          memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
 
-      livenessProbe:
-        httpGet:
-          path: /health
-          port: 8080
-        initialDelaySeconds: 15
-        periodSeconds: 10
-
-      readinessProbe:
-        httpGet:
-          path: /health
-          port: 8080
-        initialDelaySeconds: 5
-        periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
