@@ -23,7 +23,6 @@ spec:
 
   containers:
     - name: go-rabbitmq-filter
-
       image: ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
       imagePullPolicy: Always
 
@@ -55,4 +54,3 @@ spec:
           port: 8080
         initialDelaySeconds: 5
         periodSeconds: 5
-
