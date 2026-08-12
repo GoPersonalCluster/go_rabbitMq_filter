@@ -37,21 +37,21 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ secrets.GO_PERSONAL_CLUSTER_ACTOR }}
           password: ${{ secrets.GO_PERSONAL_CLUSTER_TOKEN }}
+
       # Nome EXATO do package no GHCR:
       # ghcr.io/gopersonalcluster/go-rabbitmq-filter/go-rabbitmq-filter
       - name: Definir imagem
         run: |
           echo "IMAGE=ghcr.io/gopersonalcluster/go-rabbitmq-filter" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=${{ github.sha }}" >> "$GITHUB_ENV"
-      
 
-           
       - name: Build Docker image
         run: |
           docker build \
@@ -60,19 +60,6 @@ jobs:
             .
 
       - name: Push Docker image
-        run: |
-          docker push "${IMAGE}:${IMAGE_TAG}"
-          docker push "${IMAGE}:latest"
-
-
-      - name: Build Image
-        run: |
-          docker build \
-            -t "${IMAGE}:${IMAGE_TAG}" \
-            -t "${IMAGE}:latest" \
-            .
-
-      - name: Push Image
         run: |
           docker push "${IMAGE}:${IMAGE_TAG}"
           docker push "${IMAGE}:latest"
@@ -108,12 +95,12 @@ jobs:
           echo "Atualizando Deployment..."
 
           kubectl -n ci set image deployment/go-rabbitmq-filter \
-            go-rabbitmq-filter=ghcr.io/gopersonalcluster/go-rabbitmq-filter:latest
+            go-rabbitmq-filter="${IMAGE}:${IMAGE_TAG}"
 
       - name: Verificar imagem configurada
         run: |
           kubectl -n ci get deployment go-rabbitmq-filter \
-            -o jsonpath='{.spec.template.spec.containers[0].image}' 
+            -o jsonpath='{.spec.template.spec.containers[0].image}'
 
           echo
 
