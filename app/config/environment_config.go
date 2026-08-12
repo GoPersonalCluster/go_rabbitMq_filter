@@ -13,7 +13,7 @@ func getEnv(key string) string {
 	}
 
 	return value
-}
+} 
 
 type EnvironmentConfig struct {
 	RabbitMQUsername string
