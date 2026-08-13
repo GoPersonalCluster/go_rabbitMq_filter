@@ -1,7 +1,7 @@
 package main
 
 import (
-	
+	"log"
 
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
@@ -9,8 +9,13 @@ import (
 )
 
 func main() {
-	service := service.RabbitMQConfigComposite{}
-	service.ConfigureConnection()
+	log.Println("[main] iniciando aplicação...")
+
+	svc := service.RabbitMQConfigComposite{}
+
+	log.Println("[main] configurando conexão com RabbitMQ...")
+	svc.ConfigureConnection()
+	log.Println("[main] conexão configurada com sucesso")
 
 	filterCommand := filter.FilterFactory{}
 
@@ -25,10 +30,14 @@ func main() {
 	config.QueueName = "filter_queue"
 	config.Args = nil
 
+	log.Println("[main] configurando consumer...")
 	filterConsumer.SetConfiguration(&config)
 
-	service.AddConsumer("filter_queue", &filterConsumer)
-	service.Start()
+	log.Println("[main] registrando consumer 'filter_queue'...")
+	svc.AddConsumer("filter_queue", &filterConsumer)
 
+	log.Println("[main] chamando service.Start()...")
+	svc.Start()
+
+	log.Println("[main] service.Start() retornou — aplicação vai encerrar agora")
 }
-
