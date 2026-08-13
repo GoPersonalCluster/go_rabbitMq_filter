@@ -38,6 +38,8 @@ func main() {
 
 	log.Println("[main] chamando service.Start()...")
 	svc.Start()
+	log.Println("[main] service.Start() retornou (não bloqueante) — mantendo processo vivo")
 
-	log.Println("[main] service.Start() retornou — aplicação vai encerrar agora")
+	// Mantém o processo rodando indefinidamente, já que Start() não bloqueia.
+	select {}
 }
