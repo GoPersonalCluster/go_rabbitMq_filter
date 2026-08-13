@@ -16,8 +16,8 @@ FROM debian:12-slim
 
 WORKDIR /app
 
-COPY --from=build /app/app .
+COPY --from=build /app/golang-app .
 
 EXPOSE 8080
 
-ENTRYPOINT ["./app/app"]
+ENTRYPOINT ["./golang-app"]
