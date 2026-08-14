@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
@@ -38,18 +37,9 @@ func main() {
 	svc.AddConsumer("filter_queue", &filterConsumer)
 
 	log.Println("[main] chamando service.Start()...")
-	svc.Start()
-	log.Println("[main] service.Start() retornou (não bloqueante) — subindo servidor de health check")
+	go svc.Start()
+	log.Println("[main] service.Start() retornou (não bloqueante) — mantendo processo vivo")
 
-	// Endpoint de health check exigido pelas probes do Kubernetes.
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	})
-
-	log.Println("[main] servidor HTTP ouvindo na porta 8080")
-	// ListenAndServe é bloqueante — mantém o processo vivo até dar erro fatal.
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("[main] erro no servidor HTTP: %v", err)
-	}
+	// Mantém o processo rodando indefinidamente, já que Start() não bloqueia.
+	select {}
 }
