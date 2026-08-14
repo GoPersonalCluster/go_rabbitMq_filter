@@ -1,7 +1,7 @@
 build:
 	docker-compose up -d
 bash-app:
-	docker exec -it app bash
+	docker exec -it app_filter bash
 reset-docker:
 	@docker stop $$(docker ps -aq) 2>/dev/null || true
 	@docker rm $$(docker ps -aq) 2>/dev/null || true
