@@ -40,6 +40,5 @@ func main() {
 	go svc.Start()
 	log.Println("[main] service.Start() retornou (não bloqueante) — mantendo processo vivo")
 
-	// Mantém o processo rodando indefinidamente, já que Start() não bloqueia.
 	select {}
 }
