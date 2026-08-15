@@ -9,3 +9,4 @@ require (
 	github.com/streadway/amqp v1.1.0 // indirect
 )
 
+replace github.com/GoPersonalCluster/GO_RabbitMqHandler => ../GO_RabbitMqHandler
