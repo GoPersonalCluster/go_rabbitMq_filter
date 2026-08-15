@@ -1,4 +1,4 @@
-github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
-github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/GoPersonalCluster/GO_RabbitMqHandler v0.0.0-20260701232851-77007f31da0e h1:Mb4AAz9u3voxa3Pk/3qwWyiLj4a9lMoB0CkEFdAGU8s=
+github.com/GoPersonalCluster/GO_RabbitMqHandler v0.0.0-20260701232851-77007f31da0e/go.mod h1:MC14IvTEgp0Qow4H9246LvWWdA14HKxAlYyFM7uRoK4=
 github.com/streadway/amqp v1.1.0 h1:py12iX8XSyI7aN/3dUT8DFIDJazNJsVJdxNVEpnQTZM=
 github.com/streadway/amqp v1.1.0/go.mod h1:WYSrTEYHOXHd0nwFeUXAe2G2hRnQT+deZJJf88uS9Bg=

@@ -4,9 +4,4 @@ go 1.23
 
 require github.com/GoPersonalCluster/GO_RabbitMqHandler v0.0.0-20260701232851-77007f31da0e
 
-require (
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/streadway/amqp v1.1.0 // indirect
-)
-
-replace github.com/GoPersonalCluster/GO_RabbitMqHandler => ../GO_RabbitMqHandler
+require github.com/streadway/amqp v1.1.0 // indirect
