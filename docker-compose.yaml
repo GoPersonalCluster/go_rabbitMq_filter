@@ -27,10 +27,18 @@ services:
         condition: service_started
 
     volumes:
+      # Código do go_rabbitMq_filter
       - .:/app
+
+      # GO_RabbitMqHandler local
+      - ../GO_RabbitMqHandler:/GO_RabbitMqHandler
+
+      # Cache do Go
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
+
     container_name: app_filter
+
     ports:
       - "8080:8080"
 
