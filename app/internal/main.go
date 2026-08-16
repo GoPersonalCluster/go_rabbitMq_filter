@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
@@ -34,4 +35,11 @@ func main() {
 
 	// Mantém a aplicação em execução.
 	svc.Start()
+	
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	log.Println("[main] servidor HTTP ouvindo na porta 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
