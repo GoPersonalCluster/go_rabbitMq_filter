@@ -25,10 +25,6 @@ spec:
             - containerPort: 8080
               protocol: TCP
 
-          envFrom:
-            - secretRef:
-                name: go-rabbitmq-filter-env
-
           resources:
             requests:
               cpu: "100m"
