@@ -22,10 +22,15 @@ ENV rabbitmq_username=admin \
     rabbitmq_port=5672 \
     postgres_host=postgres \
     postgres_port=5432 \
-    postgres_db=pg_rabbitmq \ 
+    postgres_db=pg_rabbitmq \
     postgres_user=postgres \
     postgres_password=postgres \
-    host_name=filterQueue
+    host_name=filterQueue \
+    redis_addr=redis:6379
+    redis_password= 
+    redis_db=0
+    jwt_secret_key=secret_key
+    jwt_token_expiration=24
 
 COPY --from=build /app/golang-app .
 

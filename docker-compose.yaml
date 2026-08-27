@@ -25,6 +25,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_started
+      redis:
+        condition: service_healthy   
 
     volumes:
       # Código do go_rabbitMq_filter
@@ -44,8 +46,24 @@ services:
 
     stdin_open: true
     tty: true
-
+    
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
 volumes:
   go-mod-cache:
   go-build-cache:
   rabbitmq_data:
+  redis_data:

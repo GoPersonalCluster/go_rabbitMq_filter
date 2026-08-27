@@ -27,6 +27,13 @@ type EnvironmentConfig struct {
 	PostgresUser     string
 	PostgresPassword string
 	HostName         string
+	
+	JwtSecretKey	 	string
+	JwtTokenExpiration 	string 
+
+	RedisAddress	 	string
+	RedisPassword	 	string 
+	RedisDB 		 	string 
 }
 
 func GetHostName() string {
@@ -46,5 +53,12 @@ func NewEnvironmentConfig() *EnvironmentConfig {
 		PostgresUser:     getEnv("postgres_user"),
 		PostgresPassword: getEnv("postgres_password"),
 		HostName:         getEnv("host_name"),
+
+		JwtSecretKey:	  	getEnv("jwt_secret_key"),
+		JwtTokenExpiration:	getEnv("jwt_token_expiration")
+
+		RedisAddress:	  	getEnv("redis_addr"),
+		RedisPassword:	  	getEnv("redis_password"),
+		RedisDB:		  	getEnv("redis_db"),
 	}
 }
