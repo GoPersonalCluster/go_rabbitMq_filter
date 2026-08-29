@@ -2,7 +2,7 @@ package strategy
 
 import (
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/config"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
 )
 
 type PiiQueueStrategy struct {

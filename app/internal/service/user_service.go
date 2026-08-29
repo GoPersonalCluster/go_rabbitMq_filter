@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/internal/repository"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/repository"
 )
 
 type User struct {

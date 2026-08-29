@@ -7,7 +7,19 @@ import (
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
+	"github.com/gin-gonic/gin"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/handler"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"strings"
+
 )
+func CaseInsensitiveRouter() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Request.URL.Path = strings.ToLower(c.Request.URL.Path)
+		c.Next()
+	}
+}
 
 func main() {
 	log.Println("[main] iniciando aplicação...")
@@ -40,6 +52,18 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	log.Println("[main] servidor HTTP ouvindo na porta 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	router := gin.Default()
+	router.Use(CaseInsensitiveRouter())
+
+	api := router.Group("/api/v1")
+	{
+		api.GET("/healthCheck", handlers.HealthCheck)
+	}
+
+	router.GET(
+		"/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
+
+	router.Run(":8080")
 }

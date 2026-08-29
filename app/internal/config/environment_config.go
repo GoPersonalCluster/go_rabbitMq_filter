@@ -55,7 +55,7 @@ func NewEnvironmentConfig() *EnvironmentConfig {
 		HostName:         getEnv("host_name"),
 
 		JwtSecretKey:	  	getEnv("jwt_secret_key"),
-		JwtTokenExpiration:	getEnv("jwt_token_expiration")
+		JwtTokenExpiration:	getEnv("jwt_token_expiration"),
 
 		RedisAddress:	  	getEnv("redis_addr"),
 		RedisPassword:	  	getEnv("redis_password"),
