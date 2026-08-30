@@ -1,8 +1,8 @@
 package service 
 
 import (
-	"github.com/golang-jwt/jwt/v5",
-	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/internal/config",
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
 )
 
 
