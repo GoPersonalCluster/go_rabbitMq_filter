@@ -8,6 +8,7 @@ import (
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
 	"github.com/gin-gonic/gin"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/routes"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/docs"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/handler"
 	swaggerFiles "github.com/swaggo/files"
@@ -49,6 +50,12 @@ func main() {
 	// Mantém a aplicação em execução.
 	svc.Start()
 	
+		// Routes
+	routes.Setup(
+		router,
+		userHandler,
+	)
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -65,6 +72,7 @@ func main() {
 		"/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
+	
 	docs.Init()
 	router.Run(":8080")
 }
