@@ -4,18 +4,18 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
-	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
-	"github.com/gin-gonic/gin"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/routes"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/docs"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/handler"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"strings"
 
+	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
+	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/docs"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/routes"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
 func CaseInsensitiveRouter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Request.URL.Path = strings.ToLower(c.Request.URL.Path)
@@ -49,12 +49,6 @@ func main() {
 
 	// Mantém a aplicação em execução.
 	svc.Start()
-	
-		// Routes
-	routes.Setup(
-		router,
-		userHandler,
-	)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -63,16 +57,19 @@ func main() {
 	router := gin.Default()
 	router.Use(CaseInsensitiveRouter())
 
-	api := router.Group("/api/v1")
-	{
-		api.GET("/healthCheck", handlers.HealthCheck)
-	}
+	// @securityDefinitions.apikey BearerAuth
+	// @in header
+	// @name Authorization
+	// @description Enter "Bearer <JWT token>"
+	routes.Setup(
+		router,
+	)
 
 	router.GET(
 		"/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
-	
+
 	docs.Init()
 	router.Run(":8080")
 }

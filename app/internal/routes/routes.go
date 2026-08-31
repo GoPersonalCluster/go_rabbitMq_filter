@@ -1,18 +1,14 @@
 package routes
 
 import (
+	handlers "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/handler"
 	"github.com/gin-gonic/gin"
-
-	"go-gin-redis/internal/handlers"
 )
 
-func Setup(
-	router *gin.Engine,
-	userHandler *handlers.UserHandler,
-) {
-	api := router.Group("/api")
-
+func Setup(router *gin.Engine) {
+	api := router.Group("/api/v1")
 	{
-		api.GET("/users/:id", userHandler.GetUser)
+		api.GET("/healthCheck", handlers.HealthCheck)
 	}
+
 }
