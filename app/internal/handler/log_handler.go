@@ -17,6 +17,6 @@ func GetPipelineLog(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		"API is healthy",
+		"API Log Endpoint",
 	)
 }

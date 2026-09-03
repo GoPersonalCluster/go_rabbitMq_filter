@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth"
+	"github.com/gin-gonic/gin"
 )
 
 func JWTMiddleware() gin.HandlerFunc {
