@@ -10,6 +10,7 @@ import (
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/docs"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/middleware"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/routes"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -56,6 +57,7 @@ func main() {
 
 	router := gin.Default()
 	router.Use(CaseInsensitiveRouter())
+	router.Use(middleware.PostMiddleware())
 
 	// @securityDefinitions.apikey BearerAuth
 	// @in header

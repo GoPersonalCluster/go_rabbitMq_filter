@@ -1,8 +1,8 @@
 package routes
 
 import (
-	middleware "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth/middleware"
 	handlers "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/handler"
+	middleware "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 

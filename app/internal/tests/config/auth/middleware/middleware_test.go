@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth/middleware"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
