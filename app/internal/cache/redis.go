@@ -2,46 +2,63 @@ package cache
 
 import (
 	"context"
-	"strconv"
+	"time"
 
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
 	"github.com/redis/go-redis/v9"
 )
 
-type Redis struct {
-	Client *redis.Client
+type RedisCache struct {
+	client *redis.Client
 }
 
-func NewRedis() (*Redis, error) {
-	conf := config.NewEnvironmentConfig()
-	db, err := strconv.Atoi(conf.RedisDB)
-	if err != nil {
-		return nil, err
-	}
+func NewRedisCache(
+	address string,
+	password string,
+	db int,
+) *RedisCache {
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     conf.RedisAddress,
-		Password: conf.RedisPassword,
+		Addr:     address,
+		Password: password,
 		DB:       db,
 	})
 
-	return &Redis{
-		Client: client,
-	}, nil
+	return &RedisCache{
+		client: client,
+	}
 }
 
-func (r *Redis) Ping(ctx context.Context) error {
-	return r.Client.Ping(ctx).Err()
+func (r *RedisCache) Ping(ctx context.Context) error {
+	return r.client.Ping(ctx).Err()
 }
 
-// func RedisHandler(cacheKey string, rc *redis.Client) {
-// 	ctx := context.Background()
+func (r *RedisCache) Set(
+	ctx context.Context,
+	key string,
+	value string,
+	expiration time.Duration,
+) error {
 
-// 	err = rc.Set(
-// 		ctx,
-// 		cacheKey,
-// 		data,
-// 		5*time.Minute,
-// 	).Err()
+	return r.client.Set(
+		ctx,
+		key,
+		value,
+		expiration,
+	).Err()
+}
 
-// }
+func (r *RedisCache) Get(
+	ctx context.Context,
+	key string,
+) (string, error) {
+
+	return r.client.Get(ctx, key).Result()
+}
+
+func (r *RedisCache) Delete(
+	ctx context.Context,
+	key string,
+) error {
+
+	return r.client.Del(ctx, key).Err()
+}
