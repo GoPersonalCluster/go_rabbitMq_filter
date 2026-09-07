@@ -8,6 +8,7 @@ import (
 
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service"
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/docs"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/routes"
@@ -57,12 +58,14 @@ func main() {
 	router := gin.Default()
 	router.Use(CaseInsensitiveRouter())
 
+	redisCache := cache.NewRedisCache()
 	// @securityDefinitions.apikey BearerAuth
 	// @in header
 	// @name Authorization
 	// @description Enter "Bearer <JWT token>"
 	routes.Setup(
 		router,
+		redisCache,
 	)
 
 	router.GET(

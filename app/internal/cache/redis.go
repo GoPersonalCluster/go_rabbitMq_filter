@@ -2,8 +2,10 @@ package cache
 
 import (
 	"context"
+	"strconv"
 	"time"
 
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -11,15 +13,16 @@ type RedisCache struct {
 	client *redis.Client
 }
 
-func NewRedisCache(
-	address string,
-	password string,
-	db int,
-) *RedisCache {
+func NewRedisCache() *RedisCache {
+	conf := config.NewEnvironmentConfig()
+	db, err := strconv.Atoi(conf.RedisDB)
+	if err != nil {
+		panic("invalid config for  redisdb")
+	}
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
+		Addr:     conf.RedisAddress,
+		Password: conf.RedisPassword,
 		DB:       db,
 	})
 
