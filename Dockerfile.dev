@@ -5,10 +5,12 @@ WORKDIR /app
 # Ferramentas úteis para desenvolvimento
 RUN go install github.com/air-verse/air@latest
 
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
 
 COPY go.mod go.sum ./
 RUN go mod download
 
-EXPOSE 8080
 
-CMD ["tail", "-f", "/dev/null"]
+EXPOSE 8080 2345
+
