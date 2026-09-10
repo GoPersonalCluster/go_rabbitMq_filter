@@ -9,12 +9,13 @@ import (
 // GetUser godoc
 // @Summary
 // @Description  Creates a user account
-// @Tags         test
+// @Tags         User
 // @Produce      json
 // @Success      201 {object} string
-// @Success      400 {object} string
+// @Error      400 {object} string
+// @Error      501 {object} string
 // @Router       /user [post]
-func User(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,

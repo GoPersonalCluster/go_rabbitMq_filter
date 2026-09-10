@@ -17,6 +17,8 @@ func SetupUnsafeRoutes(router *gin.Engine) {
 	{
 		api.GET("/healthCheck", handlers.HealthCheck)
 		api.GET("/Authentication", handlers.Authentication)
+		api.POST("/User", handlers.CreateUser)
+
 	}
 }
 
