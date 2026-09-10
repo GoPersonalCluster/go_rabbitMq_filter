@@ -49,8 +49,8 @@ func TestNewEmail_RejectsInvalidEmails(t *testing.T) {
 	for _, value := range tests {
 		t.Run(value, func(t *testing.T) {
 			_, err := vo.NewEmail(value)
+			assert.True(t, err != nil)
 
-			assert.Error(t, err)
 		})
 	}
 }
