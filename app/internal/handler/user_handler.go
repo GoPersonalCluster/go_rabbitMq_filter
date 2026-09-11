@@ -1,16 +1,13 @@
 package handlers
 
 import (
-	"errors"
-
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
-
 	"net/http"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/db"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // CreateUser godoc
@@ -41,6 +38,15 @@ func CreateUser(c *gin.Context) {
 		body.Email,
 		body.Password,
 	)
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "invalid request body",
+			},
+		)
+		return
+	}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(
@@ -54,12 +60,9 @@ func CreateUser(c *gin.Context) {
 
 	var existingUser postgresql_entity.User
 
-	err := db.
-		Where("email = ?", user.Email).
-		First(&existingUser).
-		Error
+	result := db.Where("email = ?", user.Email.Value()).First(&existingUser).Error
 
-	if err == nil {
+	if result.Error() == "" {
 		c.JSON(
 			http.StatusConflict,
 			gin.H{
@@ -69,7 +72,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if result.Error() != gorm.ErrRecordNotFound.Error() {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{
