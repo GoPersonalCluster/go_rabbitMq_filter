@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -37,6 +38,17 @@ func GetDbConnection() *gorm.DB {
 	if err := sqlDB.Ping(); err != nil {
 		log.Fatal("database is not reachable:", err)
 		panic("database configuration is unreachable")
+	}
+
+	err = db.AutoMigrate(
+		&postgresql_entity.AuthenticationLogCode{},
+		&postgresql_entity.AuthenticationLog{},
+		&postgresql_entity.User{},
+	)
+
+	if err != nil {
+		log.Fatal("database is not reachable:", err)
+		panic("error during database migration")
 	}
 	return db
 }
