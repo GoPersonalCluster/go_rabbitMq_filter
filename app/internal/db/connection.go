@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func GetDbConnection() *gorm.DB {
-	conf := config.NewEnvironmentConfig()
+	conf := os_config.NewEnvironmentConfig()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",

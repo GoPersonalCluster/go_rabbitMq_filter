@@ -2,9 +2,10 @@ package filter
 
 import (
 	"errors"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter/strategy"
+
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/filter/strategy"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
 )
 
 type FilterFactory struct {
@@ -22,10 +23,9 @@ func (c *FilterFactory) CreateStrategy(event *consumer.IntegrationEvent) (consum
 }
 
 func (c *FilterFactory) GetDefaultErrorResponse(event *consumer.IntegrationEvent) error {
-	event.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
+	event.CreateMetaHeader(os_config.GetHostName(), "ErrorMatchingEvent")
 	return errors.New(event.EventName + "event not found")
 }
-
 
 func (c *FilterFactory) GetPIIQueue(event *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
 	strategy := strategy.PiiQueueStrategy{}

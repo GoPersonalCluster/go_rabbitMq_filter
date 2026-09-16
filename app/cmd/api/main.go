@@ -26,9 +26,9 @@ func CaseInsensitiveRouter() gin.HandlerFunc {
 
 func main() {
 	log.Println("[main] iniciando aplicação...")
+	//Initialize DI
 
 	svc := service.FilterRabbitMQConfigComposite{}
-
 	svc.ConfigureConnection()
 
 	filterCommand := filter.FilterFactory{}

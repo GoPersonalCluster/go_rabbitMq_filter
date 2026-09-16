@@ -2,11 +2,10 @@ package cache
 
 import (
 	"context"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
+	"github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
-
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
-	"github.com/redis/go-redis/v9"
 )
 
 type RedisCache struct {
@@ -14,7 +13,7 @@ type RedisCache struct {
 }
 
 func NewRedisCache() *RedisCache {
-	conf := config.NewEnvironmentConfig()
+	conf := os_config.NewEnvironmentConfig()
 	db, err := strconv.Atoi(conf.RedisDB)
 	if err != nil {
 		panic("invalid config for  redisdb")

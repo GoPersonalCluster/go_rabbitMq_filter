@@ -2,7 +2,7 @@ package strategy
 
 import (
 	"github.com/GoPersonalCluster/GO_RabbitMqHandler/app/service/consumer"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/config"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
 )
 
 type PiiQueueStrategy struct {
@@ -11,7 +11,7 @@ type PiiQueueStrategy struct {
 
 func (pQS *PiiQueueStrategy) New(iE *consumer.IntegrationEvent) (consumer.StrategyHandler, error) {
 	iE.EventName = "PII"
-	mh := iE.CreateMetaHeader(config.GetHostName(), "ErrorMatchingEvent")
+	mh := iE.CreateMetaHeader(os_config.GetHostName(), "ErrorMatchingEvent")
 	mh.Args = append(mh.Args, mh.CreateArgs("NextQueue", "PII_Queue"))
 	iE.MetaHeader = append(iE.MetaHeader, mh)
 
