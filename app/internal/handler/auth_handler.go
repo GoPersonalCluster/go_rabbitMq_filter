@@ -6,6 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Init() *Config {
+	if instance == nil {
+		instance = &Config{
+			Name: "My Application",
+		}
+	}
+
+	return instance
+}
+
 // GetUser godoc
 // @Summary
 // @Description  smoke test
