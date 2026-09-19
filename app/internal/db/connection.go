@@ -18,12 +18,12 @@ func GetDbConnection() *gorm.DB {
 		conf.PostgresHost,
 		conf.PostgresUser,
 		conf.PostgresPassword,
-		conf.PostgresPort,
+		conf.PostgresDB,
 		conf.PostgresPort,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect to database:", err)
+		log.Fatal("failed to connect to database:", dsn, err)
 	}
 
 	fmt.Println("Database connected successfully")

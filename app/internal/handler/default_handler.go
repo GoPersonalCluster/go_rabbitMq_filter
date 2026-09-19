@@ -3,8 +3,19 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/di"
 	"github.com/gin-gonic/gin"
 )
+
+var dbConfig = di.NewDbConnectionDi()
+
+func Init() *di.DbConnectionDi {
+	if dbConfig == nil {
+		dbConfig = di.NewDbConnectionDi()
+	}
+
+	return dbConfig
+}
 
 // GetUser godoc
 // @Summary

@@ -13,6 +13,6 @@ swagger-init:
 	docker exec -u root -it app_filter bash -c 'go install github.com/swaggo/swag/cmd/swag@latest || swag init -g app/cmd/api/main.go -o app/internal/docs' \
 	&& sudo chown -R walter:walter app/internal/docs
 
-go-run:
+run:
 	docker exec -u root -it app_filter bash -c 'go run ./app/cmd/api'
 
