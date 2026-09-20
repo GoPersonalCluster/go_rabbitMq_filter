@@ -8,7 +8,7 @@ type AuthenticationLog struct {
 	ID                  uint                  `gorm:"primaryKey"`
 	Severity            uint                  `gorm:"column:severity;not null"`
 	UserId              uint                  `gorm:"column:severity;not null"`
-	User                User                  `gorm:"foreignKey:UserId;references:Key"`
+	User                User                  `gorm:"foreignKey:UserId;references:ID"`
 	AuthenticationLogId uint                  `gorm:"column:AuthenticationLogId;not null;index"`
 	Code                AuthenticationLogCode `gorm:"foreignKey:AuthenticationLogId;references:Id"`
 	CreatedAt           time.Time             `gorm:"column:created_at;not null;index"`

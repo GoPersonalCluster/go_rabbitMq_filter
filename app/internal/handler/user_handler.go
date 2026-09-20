@@ -60,7 +60,7 @@ func CreateUser(c *gin.Context) {
 
 	var existingUser postgresql_entity.User
 
-	result := db.Where("email = ?", user.Email.Value()).First(&existingUser).Error
+	result := db.Where("email = ?", user.Email.Value).First(&existingUser).Error
 
 	if result.Error() == "" {
 		c.JSON(

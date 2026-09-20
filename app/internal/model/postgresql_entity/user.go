@@ -14,7 +14,7 @@ type User struct {
 	Password vo.Password `gorm:"column:password_hash;size:255;not null"`
 	Active   bool        `gorm:"not null;default:true"`
 
-	CreatedAt time.Time
+	CreatedAt time.Time `gorm:"column:created_at;not null"`
 	UpdatedAt time.Time
 }
 

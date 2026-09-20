@@ -15,7 +15,7 @@ func TestNewEmail_ValidEmail(t *testing.T) {
 	)
 
 	require.NoError(t, err)
-	assert.Equal(t, "walter@example.com", email.Value())
+	assert.Equal(t, "walter@example.com", email.Value)
 }
 
 func TestNewEmail_ValidEmails(t *testing.T) {

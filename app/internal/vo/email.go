@@ -1,6 +1,7 @@
 package vo
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net/mail"
@@ -11,6 +12,33 @@ type Email struct {
 	value string
 }
 
+func (e Email) Value() (driver.Value, error) {
+	return e.value, nil
+}
+
+func (e *Email) Scan(value any) error {
+	var email string
+
+	switch v := value.(type) {
+	case string:
+		email = v
+
+	case []byte:
+		email = string(v)
+
+	default:
+		return fmt.Errorf("cannot scan %T into Email", value)
+	}
+
+	emailVO, err := NewEmail(email)
+	if err != nil {
+		return err
+	}
+
+	*e = emailVO
+
+	return nil
+}
 func NewEmail(value string) (Email, error) {
 	value = strings.TrimSpace(value)
 
@@ -54,9 +82,5 @@ func validateEmail(value string) error {
 }
 
 func (e Email) String() string {
-	return e.value
-}
-
-func (e Email) Value() string {
 	return e.value
 }

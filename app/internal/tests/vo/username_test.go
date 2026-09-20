@@ -1,17 +1,18 @@
 package vo_test
 
 import (
+	"testing"
+
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestNewUsername_ValidUsername(t *testing.T) {
 	username, err := vo.NewUsername("walter_123")
 
 	require.NoError(t, err)
-	assert.Equal(t, "walter_123", username.Value())
+	assert.Equal(t, "walter_123", username.Value)
 }
 
 func TestNewUsername_AcceptsAllowedSpecialCharacters(t *testing.T) {

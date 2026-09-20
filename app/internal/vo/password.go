@@ -1,13 +1,15 @@
 package vo
 
 import (
+	"database/sql/driver"
 	"errors"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Password struct {
-	hash string
+	value string
 }
 
 func NewPassword(plainText string) (Password, error) {
@@ -15,7 +17,7 @@ func NewPassword(plainText string) (Password, error) {
 		return Password{}, errors.New("password must contain at least 8 characters")
 	}
 
-	hash, err := bcrypt.GenerateFromPassword(
+	value, err := bcrypt.GenerateFromPassword(
 		[]byte(plainText),
 		bcrypt.DefaultCost,
 	)
@@ -25,27 +27,49 @@ func NewPassword(plainText string) (Password, error) {
 	}
 
 	return Password{
-		hash: string(hash),
+		value: string(value),
 	}, nil
 }
-
-func NewPasswordFromHash(hash string) (Password, error) {
-	if hash == "" {
-		return Password{}, errors.New("password hash cannot be empty")
+func (p Password) Value() (driver.Value, error) {
+	return p.value, nil
+}
+func NewPasswordFromvalue(value string) (Password, error) {
+	if value == "" {
+		return Password{}, errors.New("password value cannot be empty")
 	}
 
 	return Password{
-		hash: hash,
+		value: value,
 	}, nil
 }
 
 func (p Password) Verify(plainText string) bool {
 	return bcrypt.CompareHashAndPassword(
-		[]byte(p.hash),
+		[]byte(p.value),
 		[]byte(plainText),
 	) == nil
 }
 
-func (p Password) Hash() string {
-	return p.hash
+func (p *Password) Scan(value any) error {
+	var password string
+
+	switch v := value.(type) {
+	case string:
+		password = v
+
+	case []byte:
+		password = string(v)
+
+	default:
+		return fmt.Errorf("cannot scan %T into Password", value)
+	}
+
+	passwordVO, err := NewPasswordFromvalue(password)
+	if err != nil {
+		return err
+	}
+
+	*p = passwordVO
+
+	return nil
 }

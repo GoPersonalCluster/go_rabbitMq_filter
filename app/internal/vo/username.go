@@ -1,7 +1,9 @@
 package vo
 
 import (
+	"database/sql/driver"
 	"errors"
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -32,7 +34,34 @@ func NewUsername(value string) (Username, error) {
 		value: value,
 	}, nil
 }
+func (u Username) Value() (driver.Value, error) {
+	return u.value, nil
+}
 
+func (u *Username) Scan(value any) error {
+	switch v := value.(type) {
+	case string:
+		username, err := NewUsername(v)
+		if err != nil {
+			return err
+		}
+
+		*u = username
+		return nil
+
+	case []byte:
+		username, err := NewUsername(string(v))
+		if err != nil {
+			return err
+		}
+
+		*u = username
+		return nil
+
+	default:
+		return fmt.Errorf("cannot scan %T into Username", value)
+	}
+}
 func isAllowedUsernameCharacter(char rune) bool {
 	return (char >= 'a' && char <= 'z') ||
 		(char >= 'A' && char <= 'Z') ||
@@ -43,9 +72,5 @@ func isAllowedUsernameCharacter(char rune) bool {
 }
 
 func (u Username) String() string {
-	return u.value
-}
-
-func (u Username) Value() string {
 	return u.value
 }
