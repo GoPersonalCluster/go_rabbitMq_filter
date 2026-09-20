@@ -1,0 +1,107 @@
+definitions:
+  postgresql_entity.User:
+    properties:
+      active:
+        type: boolean
+      createdAt:
+        type: string
+      email:
+        $ref: '#/definitions/vo.Email'
+      id:
+        type: integer
+      password:
+        $ref: '#/definitions/vo.Password'
+      updatedAt:
+        type: string
+      username:
+        $ref: '#/definitions/vo.Username'
+    type: object
+  vo.Email:
+    type: object
+  vo.Password:
+    type: object
+  vo.Username:
+    type: object
+info:
+  contact: {}
+paths:
+  /getPipelineLog:
+    get:
+      description: smoke test
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - test
+  /healthCheck:
+    get:
+      description: smoke test
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - test
+    post:
+      description: smoke test
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      tags:
+      - test
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Creates a user account
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/postgresql_entity.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/postgresql_entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Creates a user account
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    description: Enter "Bearer <JWT token>"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

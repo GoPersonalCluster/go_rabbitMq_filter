@@ -12,7 +12,7 @@ import (
 // @Tags         test
 // @Produce      json
 // @Success      200 {object} string
-// @Success      401 {object} string
+// @Failure      401 {object} string
 // @Router       /healthCheck [post]
 func Authentication(c *gin.Context) {
 

@@ -11,17 +11,17 @@ import (
 )
 
 // CreateUser godoc
-// @Summary      Creates a user account
-// @Description  Creates a user account
-// @Tags         User
-// @Accept       json
-// @Produce      json
-// @Param        user body User true "User data"
-// @Success      201 {object} User
-// @Failure      400 {object} string
-// @Failure      409 {object} string
-// @Failure      500 {object} string
-// @Router       /user [post]
+// @Summary Creates a user account
+// @Description Creates a user account
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user body postgresql_entity.User true "User data"
+// @Success 201 {object} postgresql_entity.User
+// @Failure 400 {string} string
+// @Failure 409 {string} string
+// @Failure 500 {string} string
+// @Router /user [post]
 func CreateUser(c *gin.Context) {
 	db := db.GetDbConnection()
 
