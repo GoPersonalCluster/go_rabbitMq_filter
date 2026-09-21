@@ -36,7 +36,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-      - "2345:2345"
+      
     security_opt:
       - "seccomp:unconfined"
     cap_add:
@@ -73,6 +73,7 @@ services:
 
     ports:
       - "8080:8080"
+      - "2345:2345"
 
     stdin_open: true
     tty: true

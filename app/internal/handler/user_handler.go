@@ -10,18 +10,19 @@ import (
 	"gorm.io/gorm"
 )
 
+// swagger annotation
 // CreateUser godoc
 // @Summary Creates a user account
 // @Description Creates a user account
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param user body postgresql_entity.User true "User data"
+// @Param user body handler_model.CreateUser true "User data"
 // @Success 201 {object} postgresql_entity.User
 // @Failure 400 {string} string
 // @Failure 409 {string} string
 // @Failure 500 {string} string
-// @Router /user [post]
+// @Router /api/v1/user [post]
 func CreateUser(c *gin.Context) {
 	db := db.GetDbConnection()
 

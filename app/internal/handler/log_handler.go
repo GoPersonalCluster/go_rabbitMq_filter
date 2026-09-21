@@ -12,7 +12,7 @@ import (
 // @Tags         test
 // @Produce      json
 // @Success      200 {object} string
-// @Router       /getPipelineLog [get]
+// @Router       /api/v1/getPipelineLog [get]
 func GetPipelineLog(c *gin.Context) {
 
 	c.JSON(

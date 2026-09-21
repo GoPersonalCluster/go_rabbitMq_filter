@@ -13,7 +13,7 @@ import (
 // @Produce      json
 // @Success      200 {object} string
 // @Failure      401 {object} string
-// @Router       /healthCheck [post]
+// @Router       /api/v1/Authentication [post]
 func Authentication(c *gin.Context) {
 
 	c.JSON(

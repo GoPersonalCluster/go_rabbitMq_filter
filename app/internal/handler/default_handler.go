@@ -23,7 +23,7 @@ func Init() *di.DbConnectionDi {
 // @Tags         test
 // @Produce      json
 // @Success      200 {object} string
-// @Router       /healthCheck [get]
+// @Router       /api/v1/healthCheck [get]
 func HealthCheck(c *gin.Context) {
 
 	c.JSON(

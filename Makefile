@@ -10,9 +10,11 @@ reset-docker:
 	@docker network prune -f
 
 swagger-init:
-	docker exec -u root -it app_filter bash -c 'go install github.com/swaggo/swag/cmd/swag@latest || swag init -g app/cmd/api/main.go -o app/internal/docs' \
+	docker exec -u root -w /app/app/internal/handler  -it app_filter bash -c 'swag init -g ../../cmd/api/main.go  --dir . --parseInternal --parseDependency -o ../docs' \
 	&& sudo chown -R walter:walter app/internal/docs
 
 run:
 	docker exec -u root -it app_filter bash -c 'go run ./app/cmd/api'
-
+debug:
+	docker exec -u root -it app_filter bash -c \
+	'dlv debug ./app/cmd/api --headless --listen=0.0.0.0:2345 --api-version=2 --accept-multiclient --build-flags="-buildvcs=false"'

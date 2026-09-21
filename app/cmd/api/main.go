@@ -73,6 +73,7 @@ func main() {
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
 
-	docs.Init()
+	println(docs.SwaggerInfo.InstanceName())
+
 	router.Run(":8080")
 }
