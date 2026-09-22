@@ -7,7 +7,6 @@ import (
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // swagger annotation
@@ -49,45 +48,26 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var existingUser postgresql_entity.User
+
+	validation := db.Where("email = ?", user.Username.Value).First(&existingUser).Error
+
+	if validation == nil && existingUser.ID != 0 {
+		c.JSON(
+			http.StatusConflict,
+			gin.H{
+				"error": "Invalid email or username",
+			},
+		)
+		return
+	}
+	result := db.Create(&user)
+
+	if result.Error != nil {
 		c.JSON(
 			http.StatusBadRequest,
 			gin.H{
 				"error": "invalid request body",
-			},
-		)
-		return
-	}
-
-	var existingUser postgresql_entity.User
-
-	result := db.Where("email = ?", user.Email.Value).First(&existingUser).Error
-
-	if result.Error() == "" {
-		c.JSON(
-			http.StatusConflict,
-			gin.H{
-				"error": "email already registered",
-			},
-		)
-		return
-	}
-
-	if result.Error() != gorm.ErrRecordNotFound.Error() {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": "failed to check email",
-			},
-		)
-		return
-	}
-
-	if err := db.Create(&user).Error; err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": "failed to create user",
 			},
 		)
 		return

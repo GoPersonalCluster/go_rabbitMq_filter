@@ -47,10 +47,11 @@ func NewUser(
 	}
 
 	return &User{
-		Username: usernameVO,
-		Email:    emailVO,
-		Password: passwordVO,
-		Active:   true,
+		Username:  usernameVO,
+		Email:     emailVO,
+		Password:  passwordVO,
+		Active:    true,
+		CreatedAt: time.Now(),
 	}, nil
 }
 

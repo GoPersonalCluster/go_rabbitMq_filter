@@ -12,8 +12,8 @@ type Email struct {
 	value string
 }
 
-func (e Email) Value() (driver.Value, error) {
-	return e.value, nil
+func (e Email) Value() driver.Value {
+	return e.value
 }
 
 func (e *Email) Scan(value any) error {
@@ -79,8 +79,4 @@ func validateEmail(value string) error {
 	}
 
 	return nil
-}
-
-func (e Email) String() string {
-	return e.value
 }
