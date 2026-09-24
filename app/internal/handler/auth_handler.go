@@ -5,6 +5,8 @@ import (
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/db"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,12 +28,27 @@ func Authentication(c *gin.Context) {
 		return
 	}
 
-	user, err := postgresql_entity.NewUserAuthentication(
-		body.Username,
-		body.Password,
-	)
+	db := db.GetDbConnection()
+	username, err := vo.NewUsername(body.Username)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid username or password",
+		})
+		return
+	}
+	password, err := vo.NewPassword(body.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid username or password",
+		})
+		return
+	}
 
 	var existingUser postgresql_entity.User
-	validation := db.Where("email = ?", user.Username.Value).First(&existingUser).Error
+
+	validation := db.Where(&postgresql_entity.User{
+		Username: username,
+		Password: password,
+	}).First(&existingUser).Error
 
 }
