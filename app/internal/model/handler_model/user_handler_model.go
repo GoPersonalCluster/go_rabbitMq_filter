@@ -5,3 +5,7 @@ type CreateUser struct {
 	Password string
 	Username string
 }
+type Authentication struct {
+	Username string
+	Password string
+}

@@ -12,8 +12,8 @@ type Email struct {
 	value string
 }
 
-func (e Email) Value() driver.Value {
-	return e.value
+func (e Email) Value() (driver.Value, error) {
+	return e.value, nil
 }
 
 func (e *Email) Scan(value any) error {
