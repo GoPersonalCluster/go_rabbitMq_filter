@@ -12,10 +12,19 @@ type AuthenticationAccountGroups struct {
 	UpdatedAt   time.Time `gorm:"column:updated_at"`
 }
 
+func (AuthenticationAccountGroups) TableName() string {
+	return "authentication_account_groups"
+}
+
 type AutherticationAccountGroupsUser struct {
-	ID        uint      `gorm:"primaryKey"`
-	UserId    uint      `gorm:"column:userid;not null"`
-	GroupId   uint      `gorm:"column:key;size:255"`
-	CreatedAt time.Time `gorm:"column:created_at;not null;index"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	ID        uint                        `gorm:"primaryKey"`
+	UserId    uint                        `gorm:"column:userid;not null"`
+	GroupId   uint                        `gorm:"column:key;size:255"`
+	Group     AuthenticationAccountGroups `gorm:"foreignKey:GroupId;references:ID"`
+	CreatedAt time.Time                   `gorm:"column:created_at;not null;index"`
+	UpdatedAt time.Time                   `gorm:"column:updated_at"`
+}
+
+func (AutherticationAccountGroupsUser) TableName() string {
+	return "authentication_account_groups_user"
 }
