@@ -5,7 +5,6 @@ import (
 )
 
 type AuthenticationIP struct {
-	ID        uint      `json:"id"`
 	IP        string    `json:"ip"`
 	Score     float64   `json:"score"`
 	UpdatedAt time.Time `json:"updatedat"`

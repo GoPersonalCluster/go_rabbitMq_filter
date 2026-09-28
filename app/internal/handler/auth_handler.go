@@ -27,6 +27,8 @@ func Authentication(c *gin.Context) {
 		})
 		return
 	}
+	// cache := cache.NewRedisCache()
+	// authIp, err := cache.Get(c, c.ClientIP())
 
 	db := db.GetDbConnection()
 	username, err := vo.NewUsername(body.Username)
@@ -46,9 +48,9 @@ func Authentication(c *gin.Context) {
 
 	var existingUser postgresql_entity.User
 
-	validation := db.Where(&postgresql_entity.User{
-		Username: username,
-		Password: password,
-	}).First(&existingUser).Error
+	// validation := db.Where(&postgresql_entity.User{
+	// 	Username: username,
+	// 	Password: password,
+	// }).First(&existingUser).Error
 
 }
