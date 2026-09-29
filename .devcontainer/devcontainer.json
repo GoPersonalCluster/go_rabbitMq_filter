@@ -1,0 +1,14 @@
+{
+    "name": "go-rabbitmq-filter",
+    "dockerComposeFile": "../docker-compose.yaml",
+    "service": "filter",
+    "workspaceFolder": "/app",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go"
+            ]
+        }
+    }
+}
