@@ -2,10 +2,11 @@ package cache
 
 import (
 	"context"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
-	"github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
+
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
+	"github.com/redis/go-redis/v9"
 )
 
 type RedisCache struct {

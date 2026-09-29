@@ -11,6 +11,7 @@ import (
 )
 
 func GetDbConnection() *gorm.DB {
+	println("started connecting to db")
 	conf := os_config.NewEnvironmentConfig()
 
 	dsn := fmt.Sprintf(
@@ -26,7 +27,7 @@ func GetDbConnection() *gorm.DB {
 		log.Fatal("failed to connect to database:", dsn, err)
 	}
 
-	fmt.Println("Database connected successfully")
+	println("Database connected successfully")
 
 	// Test the underlying database connection
 	sqlDB, err := db.DB()

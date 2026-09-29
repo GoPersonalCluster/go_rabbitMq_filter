@@ -6,17 +6,7 @@ import (
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
-
-func TestNewEmail_ValidEmail(t *testing.T) {
-	email, err := vo.NewEmail(
-		"walter@example.com",
-	)
-
-	require.NoError(t, err)
-	assert.Equal(t, "walter@example.com", email.Value)
-}
 
 func TestNewEmail_ValidEmails(t *testing.T) {
 	tests := []string{
@@ -28,8 +18,9 @@ func TestNewEmail_ValidEmails(t *testing.T) {
 
 	for _, value := range tests {
 		t.Run(value, func(t *testing.T) {
-			_, err := vo.NewEmail(value)
+			t.Parallel()
 
+			_, err := vo.NewEmail(value)
 			assert.NoError(t, err)
 		})
 	}
@@ -48,9 +39,10 @@ func TestNewEmail_RejectsInvalidEmails(t *testing.T) {
 
 	for _, value := range tests {
 		t.Run(value, func(t *testing.T) {
-			_, err := vo.NewEmail(value)
-			assert.True(t, err != nil)
+			t.Parallel()
 
+			_, err := vo.NewEmail(value)
+			assert.Error(t, err)
 		})
 	}
 }

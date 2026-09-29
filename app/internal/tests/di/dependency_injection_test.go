@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func EnsureMultipleCallsToDiUseSameInstance(t *testing.T) {
+func TestEnsureMultipleCallsToDiUseSameInstance(t *testing.T) {
 	dbCon := di.NewDbConnectionDi()
-	print(dbCon.ID)
+	println(dbCon.ID.ID())
 	dbCon2 := di.NewDbConnectionDi()
-	print(dbCon2.ID)
+	println(dbCon2.ID.ID())
 	assert.Equal(t, dbCon, dbCon2)
 }

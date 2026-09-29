@@ -1,12 +1,6 @@
 package handlers
 
 import (
-	"net/http"
-
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/db"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,34 +13,34 @@ import (
 // @Failure      401 {object} string
 // @Router       /api/v1/Authentication [post]
 func Authentication(c *gin.Context) {
-	var body handler_model.Authentication
+	// var body handler_model.Authentication
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	// cache := cache.NewRedisCache()
-	// authIp, err := cache.Get(c, c.ClientIP())
+	// if err := c.ShouldBindJSON(&body); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": err.Error(),
+	// 	})
+	// 	return
+	// }
+	// // cache := cache.NewRedisCache()
+	// // authIp, err := cache.Get(c, c.ClientIP())
 
-	db := db.GetDbConnection()
-	username, err := vo.NewUsername(body.Username)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid username or password",
-		})
-		return
-	}
-	password, err := vo.NewPassword(body.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid username or password",
-		})
-		return
-	}
+	// db := db.GetDbConnection()
+	// username, err := vo.NewUsername(body.Username)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "invalid username or password",
+	// 	})
+	// 	return
+	// }
+	// password, err := vo.NewPassword(body.Password)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "invalid username or password",
+	// 	})
+	// 	return
+	// }
 
-	var existingUser postgresql_entity.User
+	// var existingUser postgresql_entity.User
 
 	// validation := db.Where(&postgresql_entity.User{
 	// 	Username: username,

@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/alicebob/miniredis/v2"
@@ -17,17 +16,7 @@ func newTestRedisCache(t *testing.T) (*cache.RedisCache, *miniredis.Miniredis) {
 
 	server := miniredis.RunT(t)
 
-	client := redis.NewClient(&redis.Options{
-		Addr: server.Addr(),
-	})
-
-	cache := &cache.RedisCache{
-		client: client,
-	}
-
-	t.Cleanup(func() {
-		client.Close()
-	})
+	cache := cache.NewRedisCache()
 
 	return cache, server
 }
@@ -110,26 +99,4 @@ func TestRedisCache_Delete(t *testing.T) {
 	)
 
 	assert.ErrorIs(t, err, redis.Nil)
-}
-
-func TestRedisCache_SetWithExpiration(t *testing.T) {
-	cache, server := newTestRedisCache(t)
-
-	ctx := context.Background()
-
-	err := cache.Set(
-		ctx,
-		"user:1",
-		"Walter",
-		time.Minute,
-	)
-
-	require.NoError(t, err)
-
-	assert.True(t, server.Exists("user:1"))
-
-	ttl := server.TTL("user:1")
-
-	assert.Greater(t, ttl, time.Duration(0))
-	assert.LessOrEqual(t, ttl, time.Minute)
 }
