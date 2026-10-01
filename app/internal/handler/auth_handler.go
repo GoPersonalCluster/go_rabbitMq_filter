@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,11 +41,20 @@ func Authentication(c *gin.Context) {
 	// 	return
 	// }
 
+	// cache := cache.NewRedisCache()
+
 	// var existingUser postgresql_entity.User
 
 	// validation := db.Where(&postgresql_entity.User{
 	// 	Username: username,
 	// 	Password: password,
 	// }).First(&existingUser).Error
+
+}
+func AuthenticateIp(c *cache.RedisCache, ctx *gin.Context) {
+	authIp, err := c.Get(
+		ctx,
+		ctx.ClientIP(),
+	)
 
 }

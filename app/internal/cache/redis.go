@@ -34,6 +34,21 @@ func NewRedisCache() *RedisCache {
 func (r *RedisCache) Ping(ctx context.Context) error {
 	return r.client.Ping(ctx).Err()
 }
+func (r *RedisCache) SetBytes(
+	ctx context.Context,
+	key string,
+	value []byte,
+	expiration time.Duration,
+) error {
+	return r.client.Set(ctx, key, value, expiration).Err()
+}
+
+func (r *RedisCache) GetBytes(
+	ctx context.Context,
+	key string,
+) ([]byte, error) {
+	return r.client.Get(ctx, key).Bytes()
+}
 
 func (r *RedisCache) Set(
 	ctx context.Context,

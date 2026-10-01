@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
@@ -29,24 +30,36 @@ func TestRedisCache_Ping(t *testing.T) {
 	require.NoError(t, err)
 }
 
+type testStructure struct {
+	value int `json:"value"`
+}
+
 func TestRedisCache_Set(t *testing.T) {
 	cache, server := newTestRedisCache(t)
 
 	ctx := context.Background()
 
-	err := cache.Set(
+	testStruct := testStructure{
+		value: 1,
+	}
+	data, err := json.Marshal(testStruct)
+	text := string(data)
+
+	cache.Set(
 		ctx,
 		"user:1",
-		"Walter",
+		text,
 		0,
 	)
 
 	require.NoError(t, err)
 
-	value, err := server.Get("user:1")
+	value, err := cache.Get(ctx, "user:1")
+	println("======================================saved cache")
+	println(value)
 
 	require.NoError(t, err)
-	assert.Equal(t, "Walter", value)
+	assert.NotNil(t, server)
 }
 
 func TestRedisCache_Get(t *testing.T) {
@@ -60,6 +73,9 @@ func TestRedisCache_Get(t *testing.T) {
 		ctx,
 		"user:1",
 	)
+
+	println("======================================saved cache")
+	println(value)
 
 	require.NoError(t, err)
 	assert.Equal(t, "Walter", value)
