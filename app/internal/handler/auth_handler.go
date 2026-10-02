@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
+
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/redis_models"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 // GetUser godoc
@@ -51,10 +55,22 @@ func Authentication(c *gin.Context) {
 	// }).First(&existingUser).Error
 
 }
-func AuthenticateIp(c *cache.RedisCache, ctx *gin.Context) {
-	authIp, err := c.Get(
+func AuthenticateIp(c *cache.RedisCache, ctx *gin.Context) (
+	*redismodels.AuthenticationIP, error) {
+	authIp, err := c.GetBytes(
 		ctx,
 		ctx.ClientIP(),
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	data := &redismodels.AuthenticationIP{}
+	json.Unmarshal(authIp, &data)
+
+	if data.IP != "" {
+		return data, nil
+	}
+	entity := redismodels.NewAuthenticationIp(ctx.ClientIP())
 
 }
