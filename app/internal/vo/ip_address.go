@@ -1,32 +1,26 @@
 package vo
 
 import (
-	"fmt"
+	"errors"
 	"net"
 )
 
 type IPAddress struct {
-	value string
+	value net.IP
 }
 
 func NewIPAddress(value string) (IPAddress, error) {
-
-	return IPAddress{
-		value: value,
-	}, nil
-}
-func (ip IPAddress) IsValid(value string) error {
-	if value == "" {
-		return fmt.Errorf("IP address cannot be empty")
-	}
-
 	ip := net.ParseIP(value)
 
-}
-func (ip IPAddress) Value() string {
-	return ip.value
+	if ip == nil {
+		return IPAddress{}, errors.New("invalid IP address")
+	}
+
+	return IPAddress{
+		value: ip,
+	}, nil
 }
 
 func (ip IPAddress) String() string {
-	return ip.value
+	return ip.value.String()
 }
