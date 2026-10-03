@@ -1,20 +1,19 @@
 package redismodels
 
 import (
+	"net"
 	"time"
-
-	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 )
 
 type AuthenticationIP struct {
-	IP    vo.IPAddress `json:"ip"`
-	Score float64      `json:"score"`
+	Score     float64   `json:"score"`
+	CreatedAt time.Time `json:"createdat"`
 }
 
-func NewAuthenticationIp(ip vo.IPAddress) *AuthenticationIP {
+func NewAuthenticationIp(ip net.IP) *AuthenticationIP {
 	return &AuthenticationIP{
-		IP:    ip,
-		Score: 100,
+		Score:     100,
+		CreatedAt: time.Now(),
 	}
 }
 
