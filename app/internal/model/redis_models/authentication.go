@@ -1,7 +1,6 @@
 package redismodels
 
 import (
-	"net"
 	"time"
 )
 
@@ -10,7 +9,7 @@ type AuthenticationIP struct {
 	CreatedAt time.Time `json:"createdat"`
 }
 
-func NewAuthenticationIp(ip net.IP) *AuthenticationIP {
+func NewAuthenticationIp() *AuthenticationIP {
 	return &AuthenticationIP{
 		Score:     100,
 		CreatedAt: time.Now(),

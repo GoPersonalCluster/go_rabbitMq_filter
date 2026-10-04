@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
@@ -13,11 +12,17 @@ import (
 	redismodels "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/redis_models"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type authDTO struct {
-	username vo.Username
-	password vo.Password
+	username         vo.Username
+	password         vo.Password
+	bodyContentError error
+	user             postgresql_entity.User
+	authUserError    error
+	redisIp          redismodels.AuthenticationIP
+	authIpError      error
 }
 
 // GetUser godoc
@@ -30,57 +35,54 @@ type authDTO struct {
 // @Router       /api/v1/Authentication [post]
 func Authentication(c *gin.Context) {
 
-	// cache := cache.NewRedisCache()
-	// authIp, err := cache.Get(c, c.ClientIP())
+	cache := cache.NewRedisCache()
 
 	db := db.GetDbConnection()
+	dto := &authDTO{}
+
+	dto = ensureBodyContentIsValid(c, dto)
+	dto = authenticateUser(db, dto)
+	dto = authenticateIp(cache, c, dto)
 
 }
 
-func ensureBodyContentIsValid(c *gin.Context, dto *authDTO) (*authDTO, error) {
+func ensureBodyContentIsValid(c *gin.Context, dto *authDTO) *authDTO {
 	var body handler_model.Authentication
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
-		return dto, fmt.Errorf("no body content was detected")
+		dto.bodyContentError = fmt.Errorf("no body content was detected")
+		return dto
 	}
 
 	username, err := vo.NewUsername(body.Username)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid username or password",
-		})
-		return dto, fmt.Errorf("invalid username format")
+		dto.bodyContentError = fmt.Errorf("invalid username format")
+		return dto
 	}
 	password, err := vo.NewPassword(body.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid username or password",
-		})
-		return dto, fmt.Errorf("invalid password format")
+		dto.bodyContentError = fmt.Errorf("invalid password format")
+		return dto
 	}
 	dto.username = username
 	dto.password = password
 
-	return dto, nil
+	return dto
 }
-func authenticateUser() {
-	var existingUser postgresql_entity.User
+func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
+	var existingUser *postgresql_entity.User
 
-	validation := db.Where(&postgresql_entity.User{
-		Username: username,
-		Password: password,
+	err := db.Where(&postgresql_entity.User{
+		Username: dto.username,
+		Password: dto.password,
 	}).First(&existingUser).Error
 
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid username or password",
-		})
-		return
-	}
+	dto.authUserError = err
+	dto.user = dto.user
+
+	return dto
 }
+
 func dataComparingStep(c *gin.Context) {
 	cache := cache.NewRedisCache()
 	var err = authenticateIp(cache, c)
@@ -94,25 +96,18 @@ func dataComparingStep(c *gin.Context) {
 
 }
 
-func authenticateIp(c *cache.RedisCache, ctx *gin.Context) error {
-	authIp, err := c.GetBytes(
-		ctx,
-		ctx.ClientIP(),
-	)
-	if err != nil {
-		return err
-	}
+func authenticateIp(c *cache.RedisCache, ctx *gin.Context, dto *authDTO) *authDTO {
+	entity := redismodels.NewAuthenticationIp()
 
-	data := &redismodels.AuthenticationIP{}
-	json.Unmarshal(authIp, &data)
-
-	if data.Score <= 0 {
-		return fmt.Errorf("user score is below zero")
-	}
-
-	entity := redismodels.NewAuthenticationIp(net.ParseIP(ctx.ClientIP()))
 	jsonb, err := json.Marshal(entity)
+	if err != nil {
+		dto.authIpError = err
+	}
 
-	cache.NewRedisCache().SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
-	return nil
+	cache.NewRedisCache().
+		SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
+
+	dto.redisIp = *entity
+
+	return dto
 }
