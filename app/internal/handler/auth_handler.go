@@ -83,15 +83,13 @@ func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
 	return dto
 }
 
-func dataComparingStep(c *gin.Context) {
+func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 	cache := cache.NewRedisCache()
-	var err = authenticateIp(cache, c)
 
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "invalid username or password",
-		})
-		return
+	switch {
+		case dto.authUserError != nil && dto.redisIp.Score > 0:
+		case dto.authUserError != nil && dto.redisIp.Score > 0:
+		case 	
 	}
 
 }
