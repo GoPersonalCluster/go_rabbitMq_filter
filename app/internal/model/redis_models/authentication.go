@@ -26,6 +26,10 @@ type AuthenticationDevice struct {
 	UserId uint   `json:"userid"`
 }
 
-type AuthenticationNetworkInterface struct {
-	HttpHeader string `json:"httpheader"`
-}
+/*
+-- O Score deve ser superior á 0 para autenticar
+-- O score deve possuir um tempo pré definido para ser reiniciado
+-- A renovação do token deve ser feita apenas pelo mesmo dispositivo que gerou o token
+
+
+*/

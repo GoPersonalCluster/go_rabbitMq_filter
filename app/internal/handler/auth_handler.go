@@ -86,6 +86,10 @@ func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
 func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 	cache := cache.NewRedisCache()
 
+	if( dto.authUserError && dto.authIpError ){
+		
+	}
+
 	switch {
 		case dto.authUserError != nil && dto.redisIp.Score > 0:
 		case dto.authUserError != nil && dto.redisIp.Score > 0:
