@@ -18,6 +18,7 @@ func NewAuthenticationIp() *AuthenticationIP {
 
 type AuthenticationAccount struct {
 	UserId    uint      `json:"userid"`
+	Score     float64   `json:"score"`
 	CreatedAt time.Time `json:"createdat"`
 }
 
@@ -31,5 +32,7 @@ type AuthenticationDevice struct {
 -- O score deve possuir um tempo pré definido para ser reiniciado
 -- A renovação do token deve ser feita apenas pelo mesmo dispositivo que gerou o token
 
+-- tentativas de autenticação não sucedidas devem reduzir o score da conta ou IP
+--
 
 */
