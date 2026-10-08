@@ -6,10 +6,11 @@ import (
 
 type AuthenticationAccountGroups struct {
 	ID          uint      `gorm:"primaryKey"`
-	Name        string    `gorm:"column:key;size:50;not null;uniqueIndex"`
-	Description string    `gorm:"column:key;size:255"`
+	Name        string    `gorm:"column:name;size:50;not null;uniqueIndex"`
+	Description string    `gorm:"column:description;size:255"`
 	CreatedAt   time.Time `gorm:"column:created_at;not null;index"`
-	UpdatedAt   time.Time `gorm:"column:updated_at"`
+	Enabled     bool      `gorm:"column:enabled;not null;default:true"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;not null"`
 }
 
 func (AuthenticationAccountGroups) TableName() string {
@@ -18,11 +19,12 @@ func (AuthenticationAccountGroups) TableName() string {
 
 type AutherticationAccountGroupsUser struct {
 	ID        uint                        `gorm:"primaryKey"`
-	UserId    uint                        `gorm:"column:userid;not null"`
-	GroupId   uint                        `gorm:"column:key;size:255"`
-	Group     AuthenticationAccountGroups `gorm:"foreignKey:GroupId;references:ID"`
+	UserId    uint                        `gorm:"column:userid;not null;uniqueIndex:idx_user_group"`
+	GroupId   uint                        `gorm:"column:groupid;not null;uniqueIndex:idx_user_group"`
+	Group     AuthenticationAccountGroups `gorm:"foreignKey:GroupId;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Enabled   bool                        `gorm:"column:enabled;not null;default:true"`
 	CreatedAt time.Time                   `gorm:"column:created_at;not null;index"`
-	UpdatedAt time.Time                   `gorm:"column:updated_at"`
+	UpdatedAt time.Time                   `gorm:"column:updated_at;not null"`
 }
 
 func (AutherticationAccountGroupsUser) TableName() string {
