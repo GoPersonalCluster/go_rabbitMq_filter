@@ -37,7 +37,7 @@ func Authentication(c *gin.Context) {
 
 	cache := cache.NewRedisCache()
 
-	db := db.GetDbConnection()
+	
 	dto := &authDTO{}
 
 	dto = ensureBodyContentIsValid(c, dto)
@@ -84,21 +84,35 @@ func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
 }
 
 func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
+	db := db.GetDbConnection()
 	cache := cache.NewRedisCache()
 
 	if( dto.authUserError && dto.authIpError ){
 		
 	}
 
-	switch {
-		case dto.authUserError != nil && dto.redisIp.Score > 0:
-		case dto.authUserError != nil && dto.redisIp.Score > 0:
-		case 	
-	}
+	// switch {
+	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
+	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
+	// 	case 	
+	// }
 
 }
 
-func authenticateIp(c *cache.RedisCache, ctx *gin.Context, dto *authDTO) *authDTO {
+func dataComparingStepValidarGruposUsuario(db *gorm.DB ){
+	db.
+
+}
+
+func dataComparingStepSpam(){
+		
+
+}
+
+func authenticateIp(c *cache.RedisCache,
+	 ctx *gin.Context,
+	 dto *authDTO ) 
+	*authDTO {
 	entity := redismodels.NewAuthenticationIp()
 
 	jsonb, err := json.Marshal(entity)
