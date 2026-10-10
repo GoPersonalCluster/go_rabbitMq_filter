@@ -100,7 +100,7 @@ func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 }
 
 func dataComparingStepValidarGruposUsuario(db *gorm.DB ){
-	db.
+	db.Where()
 
 }
 
