@@ -4,8 +4,14 @@ import (
 	"time"
 )
 
+type AuthenticationIpBlacklist struct {
+	IP          string    `gorm:"column:ip;type:varchar(15);primaryKey;not null"`
+	CreatedAt   time.Time `gorm:"column:created_at;not null;index"`
+	Description string    `gorm:"column:description;size:255"`
+}
+
 type AuthenticationAccountGroups struct {
-	ID          uint      `gorm:"primaryKey"`
+	IP          string    `gorm:"column:ip;type:varchar(15);primaryKey;not null"`
 	Name        string    `gorm:"column:name;size:50;not null;uniqueIndex"`
 	Description string    `gorm:"column:description;size:255"`
 	CreatedAt   time.Time `gorm:"column:created_at;not null;index"`

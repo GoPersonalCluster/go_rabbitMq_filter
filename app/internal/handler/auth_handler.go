@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/db"
@@ -23,6 +22,7 @@ type authDTO struct {
 	authUserError    error
 	redisIp          redismodels.AuthenticationIP
 	authIpError      error
+	IP               string
 }
 
 // GetUser godoc
@@ -34,10 +34,9 @@ type authDTO struct {
 // @Failure      401 {object} string
 // @Router       /api/v1/Authentication [post]
 func Authentication(c *gin.Context) {
-
+	db := db.GetDbConnection()
 	cache := cache.NewRedisCache()
 
-	
 	dto := &authDTO{}
 
 	dto = ensureBodyContentIsValid(c, dto)
@@ -87,33 +86,29 @@ func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 	db := db.GetDbConnection()
 	cache := cache.NewRedisCache()
 
-	if( dto.authUserError && dto.authIpError ){
-		
+	if dto.authUserError && dto.authIpError {
+
 	}
 
 	// switch {
 	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
 	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
-	// 	case 	
+	// 	case
 	// }
 
 }
 
-func dataComparingStepValidarGruposUsuario(db *gorm.DB ){
-	db.Where()
+func dataComparingStepSpam() {
 
 }
 
-func dataComparingStepSpam(){
-		
+func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
+	ctx *gin.Context,
+	dto *authDTO,
+	db *gorm.DB) *authDTO {
 
-}
-
-func authenticateIp(c *cache.RedisCache,
-	 ctx *gin.Context,
-	 dto *authDTO ) 
-	*authDTO {
 	entity := redismodels.NewAuthenticationIp()
+	dto.IP = ctx.ClientIP()
 
 	jsonb, err := json.Marshal(entity)
 	if err != nil {
@@ -124,6 +119,12 @@ func authenticateIp(c *cache.RedisCache,
 		SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
 
 	dto.redisIp = *entity
+
+	var bl postgresql_entity.AuthenticationIpBlacklist
+	validation := db.Where("IP = ?", dto.IP).First(&bl).Error
+	if()
+
+	db.Where()
 
 	return dto
 }
