@@ -122,7 +122,7 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 
 	var bl postgresql_entity.AuthenticationIpBlacklist
 	validation := db.Where("IP = ?", dto.IP).First(&bl).Error
-	if()
+	if 
 
 	db.Where()
 
