@@ -15,14 +15,16 @@ import (
 )
 
 type authDTO struct {
-	username         vo.Username
-	password         vo.Password
-	bodyContentError error
-	user             postgresql_entity.User
-	authUserError    error
-	redisIp          redismodels.AuthenticationIP
-	authIpError      error
-	IP               string
+	username                vo.Username
+	password                vo.Password
+	bodyContentError        error
+	user                    postgresql_entity.User
+	authUserError           error
+	redisIp                 redismodels.AuthenticationIP
+	authIpError             error
+	IP                      string
+	authenticationUserGroup postgresql_entity.AutherticationAccountGroupsUser
+	authenticationGroup     postgresql_entity.AuthenticationAccountGroups
 }
 
 // GetUser godoc
@@ -128,13 +130,18 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	}
 	var validationGroup postgresql_entity.AuthenticationAccountGroups
 
-	vg := db.Where("IP = ?", dto.IP).First(&validationGroup).Error
-	if vg != nil {
-		var validationGroupUser postgresql_entity.AutherticationAccountGroupsUser
-		vgu := db.Where("userId = ?", dto.user.ID).First(&validationGroupUser).Error
+	vg := db.Where("IP = ?", dto.IP).First(&validationGroup)
 
-		if vgu != nil {
-			vgu
+	if vg.Error != nil && vg != nil {
+
+		dto.authenticationGroup = validationGroup
+
+		var validationGroupUser postgresql_entity.AutherticationAccountGroupsUser
+		vgu := db.Where("userId = ?", dto.user.ID).First(&validationGroupUser)
+
+		if vgu.Error != nil && vgu != nil {
+			validationGroupUser = validationGroupUser
+			if validationGroupUser.Enabled 
 		}
 
 	}
