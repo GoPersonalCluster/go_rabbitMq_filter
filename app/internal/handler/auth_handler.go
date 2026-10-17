@@ -141,8 +141,11 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 
 		if vgu.Error != nil && vgu != nil {
 			validationGroupUser = validationGroupUser
-			if validationGroupUser.Enabled 
+			if validationGroupUser.Enabled && 
+
 		}
+
+
 
 	}
 
