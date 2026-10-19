@@ -9,6 +9,7 @@ import (
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
 	redismodels "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/redis_models"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/os_config"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -25,6 +26,7 @@ type authDTO struct {
 	IP                      string
 	authenticationUserGroup postgresql_entity.AutherticationAccountGroupsUser
 	authenticationGroup     postgresql_entity.AuthenticationAccountGroups
+	config                  EnvironmentConfig
 }
 
 // GetUser godoc
@@ -40,10 +42,11 @@ func Authentication(c *gin.Context) {
 	cache := cache.NewRedisCache()
 
 	dto := &authDTO{}
+	dto.config := os_config.NewEnvironmentConfig()
 
 	dto = ensureBodyContentIsValid(c, dto)
 	dto = authenticateUser(db, dto)
-	dto = authenticateIp(cache, c, dto)
+	dto = dataComparingStepValidarGruposUsuario(cache, c, dto, db)
 
 }
 
@@ -103,12 +106,15 @@ func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 func dataComparingStepSpam() {
 
 }
+func spamDetectionStep(dto *authDTO) {
+
+}
 
 func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	ctx *gin.Context,
 	dto *authDTO,
 	db *gorm.DB) *authDTO {
-
+	//Encontrar IP e validar score
 	entity := redismodels.NewAuthenticationIp()
 	dto.IP = ctx.ClientIP()
 
@@ -116,12 +122,17 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	if err != nil {
 		dto.authIpError = err
 	}
-
-	cache.NewRedisCache().
-		SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
-
 	dto.redisIp = *entity
+	if entity.Score <= dto.config.AuthenticationSpamScore {
+		spamDetectionStep(dto)
+	}
+	if entity.Score <= 0 {
+		entity.Score -= dto.config.AuthenticationScoreFailedAttempt
+		dto.authIpError = fmt.Errorf("Authentication failed due to score")
+		return dto
+	}
 
+	//Validar grupos de usuário
 	var bl postgresql_entity.AuthenticationIpBlacklist
 	validation := db.Where("IP = ?", dto.IP).First(&bl).Error
 	if validation != nil {
@@ -140,14 +151,27 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 		vgu := db.Where("userId = ?", dto.user.ID).First(&validationGroupUser)
 
 		if vgu.Error != nil && vgu != nil {
-			validationGroupUser = validationGroupUser
-			if validationGroupUser.Enabled && 
-
+			dto.authIpError = fmt.Errorf("User is not allowed to authenticate in this IP")
+			return dto
 		}
 
-
-
+		dto.authenticationUserGroup = validationGroupUser
 	}
+
+	cachedIp, err := cache.NewRedisCache().GetBytes(ctx, dto.IP)
+
+	//Validar autenticação de usuário
+	if dto.authUserError != nil {
+		entity.Score -= dto.config.AuthenticationScoreFailedAttempt
+	}
+
+	if err != nil {
+		cache.NewRedisCache().
+			SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
+	} else {
+		json.Unmarshal(cachedIp, &entity)
+	}
+	//
 
 	return dto
 }

@@ -31,9 +31,11 @@ type EnvironmentConfig struct {
 	JwtSecretKey       string
 	JwtTokenExpiration string
 
-	RedisAddress  string
-	RedisPassword string
-	RedisDB       string
+	RedisAddress                     string
+	RedisPassword                    string
+	RedisDB                          string
+	AuthenticationScoreFailedAttempt string
+	AuthenticationSpamScore          string
 }
 
 func GetHostName() string {
@@ -57,8 +59,10 @@ func NewEnvironmentConfig() *EnvironmentConfig {
 		JwtSecretKey:       getEnv("jwt_secret_key"),
 		JwtTokenExpiration: getEnv("jwt_token_expiration"),
 
-		RedisAddress:  getEnv("redis_addr"),
-		RedisPassword: getEnv("redis_password"),
-		RedisDB:       getEnv("redis_db"),
+		RedisAddress:                     getEnv("redis_addr"),
+		RedisPassword:                    getEnv("redis_password"),
+		RedisDB:                          getEnv("redis_db"),
+		AuthenticationScoreFailedAttempt: getEnv("authentication_score_failed_attempt"),
+		AuthenticationSpamScore:          getEnv("authentication_spam_score"),
 	}
 }
