@@ -143,8 +143,7 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 
 	vg := db.Where("IP = ?", dto.IP).First(&validationGroup)
 
-	if vg.Error != nil && vg != nil {
-
+	if vg != nil {
 		dto.authenticationGroup = validationGroup
 
 		var validationGroupUser postgresql_entity.AutherticationAccountGroupsUser
