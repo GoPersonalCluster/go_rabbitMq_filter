@@ -26,7 +26,9 @@ type authDTO struct {
 	IP                      string
 	authenticationUserGroup postgresql_entity.AutherticationAccountGroupsUser
 	authenticationGroup     postgresql_entity.AuthenticationAccountGroups
-	config                  EnvironmentConfig
+	multipleDeviceError     error
+	config                  os_config.EnvironmentConfig
+	redisDevice             redismodels.AuthenticationDevice
 }
 
 // GetUser godoc
@@ -47,6 +49,7 @@ func Authentication(c *gin.Context) {
 	dto = ensureBodyContentIsValid(c, dto)
 	dto = authenticateUser(db, dto)
 	dto = dataComparingStepValidarGruposUsuario(cache, c, dto, db)
+	dto = dataComparingStepMultipleDevices(cache, c, dto, db)
 
 }
 
@@ -109,7 +112,24 @@ func dataComparingStepSpam() {
 func spamDetectionStep(dto *authDTO) {
 
 }
+func dataComparingStepMultipleDevices(c *cache.RedisCache,
+	ctx *gin.Context,
+	dto *authDTO,
+	db *gorm.DB) *authDTO {
 
+	cachedDevice, err := cache.NewRedisCache().GetBytes(ctx, string(dto.user.ID))
+
+	if err != nil {
+		authDevice := redismodels.AuthenticationDevice{
+			Device: ctx.GetHeader("X-Device-ID"),
+			UserId: dto.user.ID,
+		}
+		json.Marshal(authDevice)
+
+		return dto.redisDevice
+	}
+
+}
 func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	ctx *gin.Context,
 	dto *authDTO,

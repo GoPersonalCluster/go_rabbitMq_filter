@@ -3,6 +3,7 @@ package os_config
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func getEnv(key string) string {
@@ -34,8 +35,8 @@ type EnvironmentConfig struct {
 	RedisAddress                     string
 	RedisPassword                    string
 	RedisDB                          string
-	AuthenticationScoreFailedAttempt string
-	AuthenticationSpamScore          string
+	AuthenticationScoreFailedAttempt float64
+	AuthenticationSpamScore          float64
 }
 
 func GetHostName() string {
@@ -43,6 +44,15 @@ func GetHostName() string {
 }
 
 func NewEnvironmentConfig() *EnvironmentConfig {
+	authScoreFailedAttempt, err := strconv.ParseFloat(getEnv("authentication_score_failed_attempt"), 64)
+	if err != nil {
+		panic("auth score is invalid")
+	}
+	authSpamScore, err := strconv.ParseFloat(getEnv("authentication_spam_score"), 64)
+	if err != nil {
+		panic("auth spam score is invalid")
+	}
+
 	return &EnvironmentConfig{
 		RabbitMQUsername: getEnv("rabbitmq_username"),
 		RabbitMQPassword: getEnv("rabbitmq_password"),
@@ -62,7 +72,7 @@ func NewEnvironmentConfig() *EnvironmentConfig {
 		RedisAddress:                     getEnv("redis_addr"),
 		RedisPassword:                    getEnv("redis_password"),
 		RedisDB:                          getEnv("redis_db"),
-		AuthenticationScoreFailedAttempt: getEnv("authentication_score_failed_attempt"),
-		AuthenticationSpamScore:          getEnv("authentication_spam_score"),
+		AuthenticationScoreFailedAttempt: authScoreFailedAttempt,
+		AuthenticationSpamScore:          authSpamScore,
 	}
 }
