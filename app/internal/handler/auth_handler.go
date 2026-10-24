@@ -27,7 +27,7 @@ type authDTO struct {
 	authenticationUserGroup postgresql_entity.AutherticationAccountGroupsUser
 	authenticationGroup     postgresql_entity.AuthenticationAccountGroups
 	multipleDeviceError     error
-	config                  os_config.EnvironmentConfig
+	config                  *os_config.EnvironmentConfig
 	redisDevice             redismodels.AuthenticationDevice
 }
 
@@ -44,7 +44,7 @@ func Authentication(c *gin.Context) {
 	cache := cache.NewRedisCache()
 
 	dto := &authDTO{}
-	dto.config := os_config.NewEnvironmentConfig()
+	dto.config = os_config.NewEnvironmentConfig()
 
 	dto = ensureBodyContentIsValid(c, dto)
 	dto = authenticateUser(db, dto)
@@ -126,7 +126,11 @@ func dataComparingStepMultipleDevices(c *cache.RedisCache,
 		}
 		json.Marshal(authDevice)
 
-		return dto.redisDevice
+		return dto
+	} else {
+		var gorm.AuthenticationDevice
+		cd := json.Unmarshal(cachedDevice)
+
 	}
 
 }
