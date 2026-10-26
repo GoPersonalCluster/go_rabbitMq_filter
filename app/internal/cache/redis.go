@@ -31,6 +31,12 @@ func NewRedisCache() *RedisCache {
 	}
 }
 
+func NewRedisCacheWithClient(client *redis.Client) *RedisCache {
+	return &RedisCache{
+		client: client,
+	}
+}
+
 func (r *RedisCache) Ping(ctx context.Context) error {
 	return r.client.Ping(ctx).Err()
 }

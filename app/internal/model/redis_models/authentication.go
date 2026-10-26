@@ -23,8 +23,13 @@ type AuthenticationAccount struct {
 }
 
 type AuthenticationDevice struct {
-	Device string `json:"device"`
-	UserId uint   `json:"userid"`
+	Device            string   `json:"device"`
+	UserId            uint     `json:"userid"`
+	LastDevice        string   `json:"last_device"`
+	Devices           []string `json:"devices"`
+	DeviceCount       int      `json:"device_count"`
+	DifferentDevices  int      `json:"different_devices"`
+	IsDifferentDevice bool     `json:"is_different_device"`
 }
 
 /*

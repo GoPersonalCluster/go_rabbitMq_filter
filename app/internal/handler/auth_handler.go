@@ -29,6 +29,9 @@ type authDTO struct {
 	multipleDeviceError     error
 	config                  *os_config.EnvironmentConfig
 	redisDevice             redismodels.AuthenticationDevice
+	deviceCount             int
+	differentDevicesCount   int
+	isDifferentDevice       bool
 }
 
 // GetUser godoc
@@ -85,16 +88,18 @@ func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
 	}).First(&existingUser).Error
 
 	dto.authUserError = err
-	dto.user = dto.user
+	if err == nil && existingUser != nil {
+		dto.user = *existingUser
+	}
 
 	return dto
 }
 
 func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
-	db := db.GetDbConnection()
-	cache := cache.NewRedisCache()
+	_ = db.GetDbConnection()
+	_ = cache.NewRedisCache()
 
-	if dto.authUserError && dto.authIpError {
+	if dto.authUserError != nil && dto.authIpError != nil {
 
 	}
 
@@ -103,7 +108,7 @@ func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
 	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
 	// 	case
 	// }
-
+	return dto
 }
 
 func dataComparingStepSpam() {
@@ -116,23 +121,142 @@ func dataComparingStepMultipleDevices(c *cache.RedisCache,
 	ctx *gin.Context,
 	dto *authDTO,
 	db *gorm.DB) *authDTO {
+	_ = db
 
-	cachedDevice, err := cache.NewRedisCache().GetBytes(ctx, string(dto.user.ID))
-
-	if err != nil {
-		authDevice := redismodels.AuthenticationDevice{
-			Device: ctx.GetHeader("X-Device-ID"),
-			UserId: dto.user.ID,
-		}
-		json.Marshal(authDevice)
-
-		return dto
-	} else {
-		var ad redismodels.AuthenticationDevice
-		cd := json.Unmarshal(cachedDevice, &ad)
-
+	if dto == nil {
+		return nil
 	}
 
+	if c == nil {
+		c = cache.NewRedisCache()
+	}
+
+	var currentDevice string
+	if ctx != nil {
+		currentDevice = ctx.GetHeader("X-Device-ID")
+	}
+
+	userKey := fmt.Sprintf("%d", dto.user.ID)
+	legacyRuneKey := string(rune(dto.user.ID))
+
+	// Verificar se existe um usuário armazenado no banco de dados do redis
+	cachedDevice, err := c.GetBytes(ctx, userKey)
+	if err != nil && legacyRuneKey != userKey {
+		if b, errFallback := c.GetBytes(ctx, legacyRuneKey); errFallback == nil {
+			cachedDevice = b
+			err = nil
+			userKey = legacyRuneKey
+		}
+	}
+
+	if err != nil {
+		// Usuário não existe no cache do Redis: registrar o dispositivo atual
+		devices := make([]string, 0)
+		if currentDevice != "" {
+			devices = append(devices, currentDevice)
+		}
+
+		authDevice := redismodels.AuthenticationDevice{
+			Device:            currentDevice,
+			UserId:            dto.user.ID,
+			LastDevice:        currentDevice,
+			Devices:           devices,
+			DeviceCount:       len(devices),
+			DifferentDevices:  len(devices),
+			IsDifferentDevice: false,
+		}
+
+		jsonb, errMarshal := json.Marshal(authDevice)
+		if errMarshal == nil {
+			_ = c.SetBytes(ctx, userKey, jsonb, 0)
+			if legacyRuneKey != userKey {
+				_ = c.SetBytes(ctx, legacyRuneKey, jsonb, 0)
+			}
+		}
+
+		dto.redisDevice = authDevice
+		dto.deviceCount = authDevice.DeviceCount
+		dto.differentDevicesCount = authDevice.DifferentDevices
+		dto.isDifferentDevice = false
+		return dto
+	}
+
+	// Usuário existe no Redis: desserializar os dados armazenados
+	var ad redismodels.AuthenticationDevice
+	if errUnmarshal := json.Unmarshal(cachedDevice, &ad); errUnmarshal != nil {
+		dto.multipleDeviceError = errUnmarshal
+		return dto
+	}
+
+	// Identificar o último dispositivo utilizado
+	lastDevice := ad.Device
+	if lastDevice == "" && ad.LastDevice != "" {
+		lastDevice = ad.LastDevice
+	}
+
+	// Identificar se o último dispositivo é diferente do atual
+	isDifferent := false
+	if lastDevice != "" && currentDevice != "" && lastDevice != currentDevice {
+		isDifferent = true
+	}
+
+	// Garantir que a lista de dispositivos contenha o dispositivo anterior
+	if len(ad.Devices) == 0 && lastDevice != "" {
+		ad.Devices = []string{lastDevice}
+	}
+
+	// Validar e adicionar o dispositivo atual à lista se ainda não existir
+	deviceExists := false
+	for _, d := range ad.Devices {
+		if d == currentDevice {
+			deviceExists = true
+			break
+		}
+	}
+	if !deviceExists && currentDevice != "" {
+		ad.Devices = append(ad.Devices, currentDevice)
+	}
+
+	// Validar quantos dispositivos diferentes foram utilizados
+	uniqueDevices := make(map[string]struct{})
+	for _, d := range ad.Devices {
+		if d != "" {
+			uniqueDevices[d] = struct{}{}
+		}
+	}
+	if currentDevice != "" {
+		uniqueDevices[currentDevice] = struct{}{}
+	}
+	differentDevicesCount := len(uniqueDevices)
+
+	// Atualizar informações do dispositivo no Redis
+	ad.LastDevice = lastDevice
+	ad.Device = currentDevice
+	ad.DeviceCount = len(ad.Devices)
+	ad.DifferentDevices = differentDevicesCount
+	ad.IsDifferentDevice = isDifferent
+
+	updatedBytes, errMarshal := json.Marshal(ad)
+	if errMarshal == nil {
+		_ = c.SetBytes(ctx, userKey, updatedBytes, 0)
+		if legacyRuneKey != userKey {
+			_ = c.SetBytes(ctx, legacyRuneKey, updatedBytes, 0)
+		}
+	}
+
+	// Identificar se múltiplos dispositivos ou dispositivo diferente foram utilizados
+	if isDifferent {
+		dto.multipleDeviceError = fmt.Errorf("different device detected: last device was '%s', current is '%s'", lastDevice, currentDevice)
+	} else if differentDevicesCount > 1 {
+		dto.multipleDeviceError = fmt.Errorf("multiple devices detected: user has %d different devices", differentDevicesCount)
+	}
+
+	dto.redisDevice = ad
+	dto.deviceCount = ad.DeviceCount
+	dto.differentDevicesCount = ad.DifferentDevices
+	dto.isDifferentDevice = isDifferent
+
+	return dto
 }
 func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	ctx *gin.Context,

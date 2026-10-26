@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var dbConfig = di.NewDbConnectionDi()
+var dbConfig *di.DbConnectionDi
 
 func Init() *di.DbConnectionDi {
 	if dbConfig == nil {
