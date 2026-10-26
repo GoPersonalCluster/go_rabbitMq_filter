@@ -128,8 +128,8 @@ func dataComparingStepMultipleDevices(c *cache.RedisCache,
 
 		return dto
 	} else {
-		var gorm.AuthenticationDevice
-		cd := json.Unmarshal(cachedDevice)
+		var ad redismodels.AuthenticationDevice
+		cd := json.Unmarshal(cachedDevice, &ad)
 
 	}
 
