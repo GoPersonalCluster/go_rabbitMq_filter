@@ -45,6 +45,9 @@ func GetDbConnection() *gorm.DB {
 		&postgresql_entity.AuthenticationLogCode{},
 		&postgresql_entity.AuthenticationLog{},
 		&postgresql_entity.User{},
+		&postgresql_entity.AuthenticationIpBlacklist{},
+		&postgresql_entity.AuthenticationAccountGroups{},
+		&postgresql_entity.AutherticationAccountGroupsUser{},
 	)
 
 	if err != nil {

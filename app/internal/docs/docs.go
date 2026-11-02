@@ -24,6 +24,17 @@ const docTemplate = `{
                 "tags": [
                     "test"
                 ],
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler_model.Authentication"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -132,6 +143,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handler_model.Authentication": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "handler_model.CreateUser": {
             "type": "object",
             "properties": {

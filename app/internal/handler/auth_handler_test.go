@@ -2,13 +2,18 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/postgresql_entity"
 	redismodels "github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/redis_models"
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/vo"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -199,4 +204,142 @@ func TestDataComparingStepMultipleDevices_LegacyRedisFormat(t *testing.T) {
 	assert.Equal(t, 2, resultDto.deviceCount)
 	assert.Equal(t, 2, resultDto.differentDevicesCount)
 	assert.ElementsMatch(t, []string{"old-dev", "new-dev"}, resultDto.redisDevice.Devices)
+}
+
+func TestDataComparingStep_NilDTO(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	resp := dataComparingStep(ctx, nil)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.NotEmpty(t, resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_BodyContentError(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		bodyContentError: errors.New("no body content was detected"),
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, "no body content was detected", resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_AuthUserError(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		authUserError: errors.New("record not found"),
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, "record not found", resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_UserZeroID(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		user: postgresql_entity.User{
+			ID: 0,
+		},
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, "invalid credentials", resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_AuthIpError(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		user:        postgresql_entity.User{ID: 10},
+		authIpError: errors.New("ip is blacklisted"),
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, "ip is blacklisted", resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_ScoreZero(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		user: postgresql_entity.User{ID: 10},
+		redisIp: redismodels.AuthenticationIP{
+			Score:     0,
+			CreatedAt: time.Now(),
+		},
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, "Authentication failed due to score", resp.Error)
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_MultipleDeviceError(t *testing.T) {
+	ctx, w := createTestGinContext("")
+	dto := &authDTO{
+		user:                postgresql_entity.User{ID: 10},
+		multipleDeviceError: errors.New("different device detected: last device was 'phone', current is 'laptop'"),
+	}
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, resp.Error, "different device detected")
+	assert.Empty(t, resp.Token)
+}
+
+func TestDataComparingStep_Success_GeneratesJWT(t *testing.T) {
+	ctx, w := createTestGinContext("device-1")
+	email, err := vo.NewEmail("walter@example.com")
+	require.NoError(t, err)
+
+	dto := &authDTO{
+		user: postgresql_entity.User{
+			ID:    42,
+			Email: email,
+		},
+		redisIp: redismodels.AuthenticationIP{
+			Score:     100,
+			CreatedAt: time.Now(),
+		},
+		authenticationGroup: postgresql_entity.AuthenticationAccountGroups{
+			Name: "admin",
+		},
+	}
+
+	resp := dataComparingStep(ctx, dto)
+
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, resp.Error)
+	assert.Equal(t, "authentication successful", resp.Message)
+	assert.NotEmpty(t, resp.Token)
+
+	// Validar que o token gerado é um JWT válido com as claims corretas
+	claims, err := auth.ValidateToken(resp.Token)
+	require.NoError(t, err)
+	assert.Equal(t, uint(42), claims.UserID)
+	assert.Equal(t, "walter@example.com", claims.Email)
+	assert.Equal(t, "admin", claims.Role)
+
+	// Validar que a resposta JSON no context bate com o DTO
+	var jsonResp authResponseDTO
+	err = json.Unmarshal(w.Body.Bytes(), &jsonResp)
+	require.NoError(t, err)
+	assert.Equal(t, resp.Token, jsonResp.Token)
+	assert.Equal(t, resp.Message, jsonResp.Message)
 }

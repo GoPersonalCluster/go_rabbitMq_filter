@@ -3,7 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
+	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/auth"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/cache"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/db"
 	"github.com/GoPersonalCluster/go_rabbitMq_filter/app/internal/model/handler_model"
@@ -33,15 +35,21 @@ type authDTO struct {
 	differentDevicesCount   int
 	isDifferentDevice       bool
 }
+type authResponseDTO struct {
+	Token   string `json:"token,omitempty"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
 
 // GetUser godoc
 // @Summary
 // @Description  smoke test
 // @Tags         test
 // @Produce      json
+// @Param user body handler_model.Authentication true "User data"
 // @Success      200 {object} string
 // @Failure      401 {object} string
-// @Router       /api/v1/Authentication [post]
+// @Router       /api/v1/authentication [post]
 func Authentication(c *gin.Context) {
 	db := db.GetDbConnection()
 	cache := cache.NewRedisCache()
@@ -50,9 +58,27 @@ func Authentication(c *gin.Context) {
 	dto.config = os_config.NewEnvironmentConfig()
 
 	dto = ensureBodyContentIsValid(c, dto)
+	if dto.bodyContentError != nil {
+		dataComparingStep(c, dto)
+		return
+	}
+
 	dto = authenticateUser(db, dto)
 	dto = dataComparingStepValidarGruposUsuario(cache, c, dto, db)
 	dto = dataComparingStepMultipleDevices(cache, c, dto, db)
+
+	result := dataComparingStep(c, dto)
+
+	if result.Error == "" {
+		c.JSON(
+			http.StatusOK,
+			result,
+		)
+	} else {
+		c.JSON(401,
+			result,
+		)
+	}
 
 }
 
@@ -95,20 +121,108 @@ func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
 	return dto
 }
 
-func dataComparingStep(c *gin.Context, dto *authDTO) *authDTO {
-	_ = db.GetDbConnection()
-	_ = cache.NewRedisCache()
-
-	if dto.authUserError != nil && dto.authIpError != nil {
-
+func dataComparingStep(c *gin.Context, dto *authDTO) *authResponseDTO {
+	if dto == nil {
+		resp := &authResponseDTO{
+			Error: "dto cannot be nil",
+		}
+		if c != nil {
+			c.JSON(http.StatusInternalServerError, resp)
+		}
+		return resp
 	}
 
-	// switch {
-	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
-	// 	case dto.authUserError != nil && dto.redisIp.Score > 0:
-	// 	case
-	// }
-	return dto
+	if dto.bodyContentError != nil {
+		resp := &authResponseDTO{
+			Error: dto.bodyContentError.Error(),
+		}
+		if c != nil {
+			c.JSON(http.StatusBadRequest, resp)
+		}
+		return resp
+	}
+
+	if dto.authUserError != nil {
+		resp := &authResponseDTO{
+			Error: dto.authUserError.Error(),
+		}
+		if c != nil {
+			c.JSON(http.StatusUnauthorized, resp)
+		}
+		return resp
+	}
+
+	if dto.user.ID == 0 {
+		resp := &authResponseDTO{
+			Error: "invalid credentials",
+		}
+		if c != nil {
+			c.JSON(http.StatusUnauthorized, resp)
+		}
+		return resp
+	}
+
+	if dto.authIpError != nil {
+		resp := &authResponseDTO{
+			Error: dto.authIpError.Error(),
+		}
+		if c != nil {
+			c.JSON(http.StatusUnauthorized, resp)
+		}
+		return resp
+	}
+
+	if dto.redisIp.Score < 0 || (!dto.redisIp.CreatedAt.IsZero() && dto.redisIp.Score <= 0) {
+		resp := &authResponseDTO{
+			Error: "Authentication failed due to score",
+		}
+		if c != nil {
+			c.JSON(http.StatusUnauthorized, resp)
+		}
+		return resp
+	}
+
+	if dto.multipleDeviceError != nil {
+		resp := &authResponseDTO{
+			Error: dto.multipleDeviceError.Error(),
+		}
+		if c != nil {
+			c.JSON(http.StatusUnauthorized, resp)
+		}
+		return resp
+	}
+
+	emailStr := dto.user.Email.String()
+	if emailStr == "" {
+		if val, err := dto.user.Email.Value(); err == nil && val != nil {
+			emailStr = fmt.Sprintf("%v", val)
+		}
+	}
+
+	role := "user"
+	if dto.authenticationGroup.Name != "" {
+		role = dto.authenticationGroup.Name
+	}
+
+	token, err := auth.GenerateToken(dto.user.ID, emailStr, role)
+	if err != nil {
+		resp := &authResponseDTO{
+			Error: fmt.Sprintf("failed to generate token: %s", err.Error()),
+		}
+		if c != nil {
+			c.JSON(http.StatusInternalServerError, resp)
+		}
+		return resp
+	}
+
+	resp := &authResponseDTO{
+		Token:   token,
+		Message: "authentication successful",
+	}
+	if c != nil {
+		c.JSON(http.StatusOK, resp)
+	}
+	return resp
 }
 
 func dataComparingStepSpam() {

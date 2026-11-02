@@ -16,6 +16,10 @@ func (e Email) Value() (driver.Value, error) {
 	return e.value, nil
 }
 
+func (e Email) String() string {
+	return e.value
+}
+
 func (e *Email) Scan(value any) error {
 	var email string
 

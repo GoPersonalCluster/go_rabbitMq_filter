@@ -1,4 +1,11 @@
 definitions:
+  handler_model.Authentication:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   handler_model.CreateUser:
     properties:
       email:
@@ -37,6 +44,13 @@ paths:
   /api/v1/Authentication:
     post:
       description: smoke test
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler_model.Authentication'
       produces:
       - application/json
       responses:

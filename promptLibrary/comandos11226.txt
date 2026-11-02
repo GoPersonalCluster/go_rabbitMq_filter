@@ -1,0 +1,8 @@
+
+no arquivo app/internal/model/redis_models/authentication.go termine
+o metodo func Authentication(c *gin.Context) adicionando uma nova função
+ dataComparingStep(c *gin.Context, dto *authDTO) *authResponseDTO.
+ A função  dataComparingStep(c *gin.Context, dto *authDTO) *authResponseDTO deve verificar se há
+ algum erro de autenticação comparando todos os dados da authDTO e retornar uma resposta
+ para o usuário.
+ caso não haja nenhum erro  deve ser gerado um token jwt
