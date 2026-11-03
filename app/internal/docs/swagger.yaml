@@ -41,7 +41,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/Authentication:
+  /api/v1/authentication:
     post:
       description: smoke test
       parameters:

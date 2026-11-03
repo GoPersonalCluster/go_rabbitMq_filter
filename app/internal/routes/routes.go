@@ -16,7 +16,7 @@ func SetupUnsafeRoutes(router *gin.Engine) {
 	api := router.Group("/api/v1")
 	{
 		api.GET("/healthCheck", handlers.HealthCheck)
-		api.GET("/authentication", handlers.Authentication)
+		api.POST("/authentication", handlers.Authentication)
 		api.POST("/user", handlers.CreateUser)
 
 	}

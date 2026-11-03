@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/Authentication": {
+        "/api/v1/authentication": {
             "post": {
                 "description": "smoke test",
                 "produces": [

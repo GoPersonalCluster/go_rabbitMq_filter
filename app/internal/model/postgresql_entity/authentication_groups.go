@@ -26,8 +26,8 @@ func (AuthenticationAccountGroups) TableName() string {
 type AutherticationAccountGroupsUser struct {
 	ID        uint                        `gorm:"primaryKey"`
 	UserId    uint                        `gorm:"column:userid;not null;uniqueIndex:idx_user_group"`
-	GroupId   uint                        `gorm:"column:groupid;not null;uniqueIndex:idx_user_group"`
-	Group     AuthenticationAccountGroups `gorm:"foreignKey:GroupId;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	GroupId   string                      `gorm:"column:groupid;type:varchar(15);not null;uniqueIndex:idx_user_group"`
+	Group     AuthenticationAccountGroups `gorm:"foreignKey:GroupId;references:IP;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	Enabled   bool                        `gorm:"column:enabled;not null;default:true"`
 	CreatedAt time.Time                   `gorm:"column:created_at;not null;index"`
 	UpdatedAt time.Time                   `gorm:"column:updated_at;not null"`

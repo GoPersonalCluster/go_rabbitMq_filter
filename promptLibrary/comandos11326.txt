@@ -1,0 +1,18 @@
+ao tentar fazer uma request do tipo POST ao endpoint api/v1/authentication ocorre o seguinte erro :
+  CORS
+  Network Failure
+  URL scheme must be "http" or "https" for CORS request.
+
+  revise o código para garantir que ao mudar a identidade de coluna ID para coluna IP não haverá problemas de execução, caso não haja problemas modifique coluna a identidade da tabela para coluna IP
+
+  corrija o metodo can't parse JSON.  Raw result:
+  {"error":"record not found"}{"error":"record not found"}
+  no arquivo /home/walter/repos/go_rabbitMq_filter/app/internal/handler/auth_handler.go , metodo : Authentication(c *gin.Context)
+
+ o teste de endpoint authentication gerou a mensagem de erro :
+  {
+    "error": "record not found"
+  }
+  que é uma resposta incorreta já que o usuário ja foi cadastrado no banco de dados e quando não houver registros de IP já
+  cadastrados por este usuário que descrevam uma tentativa de spam ou utilização de multiplos dispositivos o
+  usuário deve ser capas de autenticar normalmente

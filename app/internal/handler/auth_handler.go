@@ -20,6 +20,7 @@ import (
 type authDTO struct {
 	username                vo.Username
 	password                vo.Password
+	plainPassword           string
 	bodyContentError        error
 	user                    postgresql_entity.User
 	authUserError           error
@@ -65,21 +66,11 @@ func Authentication(c *gin.Context) {
 
 	dto = authenticateUser(db, dto)
 	dto = dataComparingStepValidarGruposUsuario(cache, c, dto, db)
-	dto = dataComparingStepMultipleDevices(cache, c, dto, db)
-
-	result := dataComparingStep(c, dto)
-
-	if result.Error == "" {
-		c.JSON(
-			http.StatusOK,
-			result,
-		)
-	} else {
-		c.JSON(401,
-			result,
-		)
+	if dto.authUserError == nil && dto.user.ID != 0 {
+		dto = dataComparingStepMultipleDevices(cache, c, dto, db)
 	}
 
+	dataComparingStep(c, dto)
 }
 
 func ensureBodyContentIsValid(c *gin.Context, dto *authDTO) *authDTO {
@@ -102,22 +93,25 @@ func ensureBodyContentIsValid(c *gin.Context, dto *authDTO) *authDTO {
 	}
 	dto.username = username
 	dto.password = password
+	dto.plainPassword = body.Password
 
 	return dto
 }
 func authenticateUser(db *gorm.DB, dto *authDTO) *authDTO {
-	var existingUser *postgresql_entity.User
+	var existingUser postgresql_entity.User
 
-	err := db.Where(&postgresql_entity.User{
-		Username: dto.username,
-		Password: dto.password,
-	}).First(&existingUser).Error
-
-	dto.authUserError = err
-	if err == nil && existingUser != nil {
-		dto.user = *existingUser
+	err := db.Where("username = ?", dto.username).First(&existingUser).Error
+	if err != nil {
+		dto.authUserError = err
+		return dto
 	}
 
+	if !existingUser.VerifyPassword(dto.plainPassword) {
+		dto.authUserError = fmt.Errorf("invalid credentials")
+		return dto
+	}
+
+	dto.user = existingUser
 	return dto
 }
 
@@ -376,63 +370,68 @@ func dataComparingStepValidarGruposUsuario(c *cache.RedisCache,
 	ctx *gin.Context,
 	dto *authDTO,
 	db *gorm.DB) *authDTO {
+	if c == nil {
+		c = cache.NewRedisCache()
+	}
+
 	//Encontrar IP e validar score
 	entity := redismodels.NewAuthenticationIp()
 	dto.IP = ctx.ClientIP()
 
-	jsonb, err := json.Marshal(entity)
-	if err != nil {
-		dto.authIpError = err
+	cachedIp, err := c.GetBytes(ctx, dto.IP)
+	if err == nil {
+		_ = json.Unmarshal(cachedIp, entity)
 	}
-	dto.redisIp = *entity
-	if entity.Score <= dto.config.AuthenticationSpamScore {
-		spamDetectionStep(dto)
-	}
-	if entity.Score <= 0 {
-		entity.Score -= dto.config.AuthenticationScoreFailedAttempt
-		dto.authIpError = fmt.Errorf("Authentication failed due to score")
-		return dto
-	}
-
-	//Validar grupos de usuário
-	var bl postgresql_entity.AuthenticationIpBlacklist
-	validation := db.Where("IP = ?", dto.IP).First(&bl).Error
-	if validation != nil {
-		dto.authIpError = fmt.Errorf("ip is blacklisted")
-		return dto
-	}
-	var validationGroup postgresql_entity.AuthenticationAccountGroups
-
-	vg := db.Where("IP = ?", dto.IP).First(&validationGroup)
-
-	if vg != nil {
-		dto.authenticationGroup = validationGroup
-
-		var validationGroupUser postgresql_entity.AutherticationAccountGroupsUser
-		vgu := db.Where("userId = ?", dto.user.ID).First(&validationGroupUser)
-
-		if vgu.Error != nil && vgu != nil {
-			dto.authIpError = fmt.Errorf("User is not allowed to authenticate in this IP")
-			return dto
-		}
-
-		dto.authenticationUserGroup = validationGroupUser
-	}
-
-	cachedIp, err := cache.NewRedisCache().GetBytes(ctx, dto.IP)
 
 	//Validar autenticação de usuário
 	if dto.authUserError != nil {
 		entity.Score -= dto.config.AuthenticationScoreFailedAttempt
 	}
 
-	if err != nil {
-		cache.NewRedisCache().
-			SetBytes(ctx, ctx.ClientIP(), jsonb, 360)
-	} else {
-		json.Unmarshal(cachedIp, &entity)
+	dto.redisIp = *entity
+	if entity.Score <= dto.config.AuthenticationSpamScore {
+		spamDetectionStep(dto)
 	}
-	//
+	if entity.Score <= 0 {
+		entity.Score -= dto.config.AuthenticationScoreFailedAttempt
+		dto.redisIp = *entity
+		dto.authIpError = fmt.Errorf("Authentication failed due to score")
+		if jsonb, errMarshal := json.Marshal(entity); errMarshal == nil {
+			_ = c.SetBytes(ctx, dto.IP, jsonb, 360)
+		}
+		return dto
+	}
+
+	if jsonb, errMarshal := json.Marshal(entity); errMarshal == nil {
+		_ = c.SetBytes(ctx, dto.IP, jsonb, 360)
+	} else {
+		dto.authIpError = errMarshal
+	}
+
+	//Validar grupos de usuário
+	var bl postgresql_entity.AuthenticationIpBlacklist
+	validation := db.Where("IP = ?", dto.IP).First(&bl).Error
+	if validation == nil && bl.IP != "" {
+		dto.authIpError = fmt.Errorf("ip is blacklisted")
+		return dto
+	}
+
+	var validationGroup postgresql_entity.AuthenticationAccountGroups
+	vg := db.Where("IP = ?", dto.IP).First(&validationGroup)
+
+	if vg.Error == nil && validationGroup.IP != "" {
+		dto.authenticationGroup = validationGroup
+
+		var validationGroupUser postgresql_entity.AutherticationAccountGroupsUser
+		vgu := db.Where("userId = ? AND groupId = ?", dto.user.ID, validationGroup.IP).First(&validationGroupUser)
+
+		if vgu.Error != nil {
+			dto.authIpError = fmt.Errorf("User is not allowed to authenticate in this IP")
+			return dto
+		}
+
+		dto.authenticationUserGroup = validationGroupUser
+	}
 
 	return dto
 }
